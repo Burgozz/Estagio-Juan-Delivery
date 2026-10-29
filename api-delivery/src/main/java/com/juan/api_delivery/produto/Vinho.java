@@ -15,6 +15,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_NEGATIVO;
+
 @Entity
 @DiscriminatorValue("VINHO")
 @Data
@@ -34,8 +37,8 @@ public class Vinho extends Produto {
     @SafraValida
     private int safra;
 
-    @DecimalMin(value = "0.0", message = "Teor alcoólico não pode ser negativo")
-    @DecimalMax(value = "100.0", message = "Teor alcoólico inválido")
+    @DecimalMin(value = "0.0", message = TEOR_ALCOOL_NEGATIVO)
+    @DecimalMax(value = "100.0", message = TEOR_ALCOOL_INVALIDO)
     private double teorAlcool;
 
     @NotBlank

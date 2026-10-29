@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import com.juan.api_delivery.shared.validation.SafraValida;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +16,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import static com.juan.api_delivery.shared.exception.MensagensErro.ESTOQUE_NEGATIVO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_NEGATIVO;
 
 @Data
 @NoArgsConstructor
@@ -34,6 +37,8 @@ public class ProdutoDTO {
     private String paisOrigem;
     @SafraValida
     private Integer safra;
+    @DecimalMin(value = "0.0", message = TEOR_ALCOOL_NEGATIVO)
+    @DecimalMax(value = "100.0", message = TEOR_ALCOOL_INVALIDO)
     private Double teorAlcool;
     // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
     @Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s,.\\-/]+$", message = "Harmonização deve conter apenas letras e pontuação simples")

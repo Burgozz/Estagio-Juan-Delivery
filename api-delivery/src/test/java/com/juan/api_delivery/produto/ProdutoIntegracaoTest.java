@@ -173,8 +173,6 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             criar(corpo);
         }
 
-        // BUG ENCONTRADO: ProdutoDTO.teorAlcool não tem @DecimalMin/@DecimalMax. A
-        // regra 0–100 só existe na entidade Vinho, e o erro chega fora do padrão.
         @ParameterizedTest
         @ValueSource(doubles = {-0.1, 100.1})
         void teorAlcoolForaDoLimiteRetorna400NoFormatoErros(double teor) throws Exception {
