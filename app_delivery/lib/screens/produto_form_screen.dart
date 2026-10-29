@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
+import '../utils/harmonizacao_validator.dart';
 import '../widgets/pais_autocomplete_field.dart';
+import '../widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kTextPrimary = Color(0xFF212121);
@@ -104,7 +106,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       paisOrigem: _isVinho ? _paisCtrl.text.trim() : null,
       safra: _isVinho ? int.tryParse(_safraCtrl.text.trim()) : null,
       teorAlcool: _isVinho ? double.tryParse(_teorAlcoolCtrl.text.trim()) : null,
-      harmonizacao: _isVinho ? _harmonizacaoCtrl.text.trim() : null,
+      harmonizacao: _isVinho ? normalizarHarmonizacao(_harmonizacaoCtrl.text) : null,
       tipoAcessorio: _isVinho ? null : _tipoAcessorioCtrl.text.trim(),
       marca: _isVinho ? null : _marcaCtrl.text.trim(),
       material: _isVinho ? null : _materialCtrl.text.trim(),
@@ -191,7 +193,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 decoration: const InputDecoration(
-                  labelText: 'Nome do Produto *',
+                  label: LabelObrigatorio('Nome do Produto'),
                   prefixIcon: Icon(Icons.label_outline, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
@@ -205,7 +207,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 cursorColor: kPrimary,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Preço (R\$) *',
+                  label: LabelObrigatorio('Preço (R\$)'),
                   prefixIcon: Icon(Icons.attach_money, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) {
@@ -236,7 +238,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(
-                  labelText: 'Estoque (unidades) *',
+                  label: LabelObrigatorio('Estoque (unidades)'),
                   prefixIcon: Icon(Icons.inventory_2_outlined, color: kTextSecondary, size: 20),
                 ),
                 validator: (v) {
@@ -270,7 +272,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       DropdownButtonFormField<String>(
         initialValue: _categoriaSelecionada,
         decoration: const InputDecoration(
-          labelText: 'Categoria *',
+          label: LabelObrigatorio('Categoria'),
           prefixIcon: Icon(Icons.category_outlined, color: kTextSecondary, size: 20),
         ),
         dropdownColor: Colors.white,
@@ -370,14 +372,18 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         style: const TextStyle(color: kTextPrimary),
         cursorColor: kPrimary,
         decoration: const InputDecoration(
-          labelText: 'Harmonização',
+          label: LabelObrigatorio('Harmonização'),
           hintText: 'Ex: Carnes vermelhas, queijos',
           prefixIcon: Icon(Icons.restaurant_outlined, color: kTextSecondary, size: 20),
         ),
+        inputFormatters: [harmonizacaoInputFormatter],
         onChanged: (_) {
           if (_harmonizacaoApiError != null) setState(() => _harmonizacaoApiError = null);
         },
-        validator: (v) => _harmonizacaoApiError,
+        validator: (v) {
+          if (!_isVinho) return null;
+          return validarHarmonizacao(v) ?? _harmonizacaoApiError;
+        },
       ),
     ];
   }
@@ -389,7 +395,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         style: const TextStyle(color: kTextPrimary),
         cursorColor: kPrimary,
         decoration: const InputDecoration(
-          labelText: 'Tipo de Acessório *',
+          label: LabelObrigatorio('Tipo de Acessório'),
           hintText: 'Ex: Saca-rolhas, Decantador, Taça',
           prefixIcon: Icon(Icons.category_outlined, color: kTextSecondary, size: 20),
         ),

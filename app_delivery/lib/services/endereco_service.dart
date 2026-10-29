@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/endereco.dart';
 
 class EnderecoService {
-  final String baseUrl = 'http://localhost:8080';
+  final String baseUrl = ApiConfig.baseUrl;
 
   String _parseErro(http.Response response) {
     try {

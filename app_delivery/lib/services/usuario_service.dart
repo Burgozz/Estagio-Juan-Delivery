@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/usuario.dart';
 
 class UsuarioService {
-  final String baseUrl = 'http://localhost:8080/usuarios';
+  final String baseUrl = '${ApiConfig.baseUrl}/usuarios';
 
   String _parseErro(http.Response response) {
     try {
@@ -20,6 +21,17 @@ class UsuarioService {
 
   Future<List<Usuario>> listarTodos() async {
     final response = await http.get(Uri.parse(baseUrl));
+    if (response.statusCode != 200) {
+      throw Exception(_parseErro(response));
+    }
+    final List data = jsonDecode(response.body);
+    return data.map((e) => Usuario.fromJson(e)).toList();
+  }
+
+  /// Usado pela tela de administração de usuários: lista todos os usuários,
+  /// incluindo os inativos (GET /usuarios/admin).
+  Future<List<Usuario>> listarTodosAdmin() async {
+    final response = await http.get(Uri.parse('$baseUrl/admin'));
     if (response.statusCode != 200) {
       throw Exception(_parseErro(response));
     }

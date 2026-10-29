@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/pedido.dart';
 import '../models/item_pedido.dart';
 
 class PedidoService {
-  final String baseUrl = 'http://localhost:8080/pedidos';
+  final String baseUrl = '${ApiConfig.baseUrl}/pedidos';
 
   String _parseErro(http.Response response) {
     try {

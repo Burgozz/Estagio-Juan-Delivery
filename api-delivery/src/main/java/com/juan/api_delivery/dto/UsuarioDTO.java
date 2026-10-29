@@ -3,7 +3,8 @@ package com.juan.api_delivery.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.juan.api_delivery.validation.CpfValido;
+import com.juan.api_delivery.validation.EmailDominioValido;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import lombok.Data;
@@ -21,14 +22,11 @@ public class UsuarioDTO {
     private String nome;
 
     @NotBlank
-    @Size(min = 11, max = 11, message = "CPF deve conter exatamente 11 dígitos")
-    @Pattern(
-        regexp = "^\\d{11}$",
-        message = "CPF deve conter apenas números"
-    )
+    @CpfValido
     private String cpf;
 
     @Email
+    @EmailDominioValido
     private String email;
 
     @NotBlank

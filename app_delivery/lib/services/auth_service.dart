@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class AuthService {
-  final String baseUrl = 'http://localhost:8080/auth';
+  final String baseUrl = '${ApiConfig.baseUrl}/auth';
 
   String _parseErro(http.Response response) {
     try {

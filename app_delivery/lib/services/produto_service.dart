@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/produto.dart';
 
 class ProdutoService {
-  final String baseUrl = 'http://localhost:8080/produtos';
+  final String baseUrl = '${ApiConfig.baseUrl}/produtos';
 
   String _parseErro(http.Response response) {
     try {

@@ -10,4 +10,6 @@ import com.juan.api_delivery.model.ItemPedido;
 @Repository
 public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
     List<ItemPedido> findByPedidoId(Long pedidoId);
+
+    boolean existsByProdutoId(Long produtoId);
 }

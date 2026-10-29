@@ -7,6 +7,7 @@ class Usuario {
   final String? telefone;
   final dynamic dataCadastro;
   final bool ativo;
+  final String? perfil;
 
   Usuario({
     this.id,
@@ -17,6 +18,7 @@ class Usuario {
     this.telefone,
     this.dataCadastro,
     this.ativo = true,
+    this.perfil,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) => Usuario(
@@ -28,6 +30,7 @@ class Usuario {
         telefone: json['telefone'],
         dataCadastro: json['dataCadastro'],
         ativo: json['ativo'] ?? true,
+        perfil: json['perfil']?.toString(),
       );
 
   Map<String, dynamic> toJson() => {

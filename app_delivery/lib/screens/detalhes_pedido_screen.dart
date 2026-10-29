@@ -23,58 +23,11 @@ const _kStatusCores = {
   'CANCELADO': Color(0xFFC62828), // vermelho
 };
 
-/// Descreve a ação disponível para avançar o pedido a partir do status atual:
-/// o próximo status, o texto/cor do botão e o texto do diálogo de confirmação.
-class _AcaoStatus {
-  final String proximoStatus;
-  final String textoBotao;
-  final Color cor;
-  final String tituloDialogo;
-  final String mensagemDialogo;
-
-  const _AcaoStatus({
-    required this.proximoStatus,
-    required this.textoBotao,
-    required this.cor,
-    required this.tituloDialogo,
-    required this.mensagemDialogo,
-  });
-}
-
-const _kAcoesPorStatus = {
-  'PENDENTE': _AcaoStatus(
-    proximoStatus: 'CONFIRMADO',
-    textoBotao: 'CONFIRMAR PEDIDO',
-    cor: Color(0xFF1565C0),
-    tituloDialogo: 'Confirmar pedido',
-    mensagemDialogo: 'Confirma o recebimento deste pedido?',
-  ),
-  'CONFIRMADO': _AcaoStatus(
-    proximoStatus: 'EM_PREPARO',
-    textoBotao: 'MARCAR COMO EM PREPARO',
-    cor: Color(0xFF6A1B9A),
-    tituloDialogo: 'Marcar como em preparo',
-    mensagemDialogo: 'Confirma que este pedido entrou em preparo?',
-  ),
-  'EM_PREPARO': _AcaoStatus(
-    proximoStatus: 'EM_ENTREGA',
-    textoBotao: 'MARCAR COMO EM ENTREGA',
-    cor: Color(0xFFE65100),
-    tituloDialogo: 'Marcar como em entrega',
-    mensagemDialogo: 'Confirma que este pedido saiu para entrega?',
-  ),
-  'EM_ENTREGA': _AcaoStatus(
-    proximoStatus: 'ENTREGUE',
-    textoBotao: 'CONFIRMAR ENTREGA',
-    cor: Color(0xFF2E7D32),
-    tituloDialogo: 'Confirmar entrega',
-    mensagemDialogo: 'Confirma que este pedido foi entregue?',
-  ),
-};
+const _kVerdeEntrega = Color(0xFF2E7D32);
 
 /// Tela de detalhes de um pedido: busca o pedido (GET /pedidos/{id}) e seus
 /// itens (GET /pedidos/{pedidoId}/itens), exibindo status, itens, endereço
-/// de entrega e um botão de ação que avança o pedido para o próximo status.
+/// de entrega e um botão para o cliente confirmar que recebeu o pedido.
 class DetalhesPedidoScreen extends StatefulWidget {
   final int pedidoId;
 
@@ -127,14 +80,17 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
   // praticado no momento da compra.
   double get _totalCalculado => _itens.fold(0.0, (soma, item) => soma + item.subtotal);
 
-  Future<void> _executarAcao(_AcaoStatus acao) async {
+  Future<void> _confirmarEntrega() async {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(acao.tituloDialogo, style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600)),
-        content: Text(acao.mensagemDialogo, style: const TextStyle(color: kTextSecondary)),
+        title: const Text('Confirmar recebimento?', style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600)),
+        content: const Text(
+          'Você confirma que recebeu seu pedido?',
+          style: TextStyle(color: kTextSecondary),
+        ),
         actions: [
           TextButton(
             style: TextButton.styleFrom(foregroundColor: kTextSecondary),
@@ -142,7 +98,7 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: acao.cor),
+            style: TextButton.styleFrom(foregroundColor: _kVerdeEntrega),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Confirmar', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
@@ -153,23 +109,19 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
 
     setState(() => _atualizandoStatus = true);
     try {
-      await _service.atualizarStatus(widget.pedidoId, acao.proximoStatus);
-      if (!mounted) return;
-      await _carregar();
+      await _service.atualizarStatus(widget.pedidoId, 'ENTREGUE');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Pedido atualizado para ${_kStatusLabels[acao.proximoStatus] ?? acao.proximoStatus}'),
+          content: const Text('Pedido confirmado! Obrigado pela sua compra!'),
           backgroundColor: Colors.green.shade700,
         ),
       );
-      if (acao.proximoStatus == 'ENTREGUE') {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const PedidoConcluidoScreen()),
-          (route) => false,
-        );
-      }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const PedidoConcluidoScreen()),
+        (route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       final mensagem = e.toString().replaceFirst('Exception: ', '');
@@ -218,10 +170,10 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
   Widget _buildConteudo(Pedido pedido) {
     final cor = _kStatusCores[pedido.status] ?? kTextSecondary;
     final label = _kStatusLabels[pedido.status] ?? pedido.status;
-    // O botão de ação avança o pedido para o próximo status da esteira;
-    // ENTREGUE e CANCELADO não têm próximo status, então a tela fica
-    // somente leitura.
-    final acao = _kAcoesPorStatus[pedido.status];
+    // O botão de confirmar entrega aparece para qualquer pedido ainda em
+    // andamento (PENDENTE, CONFIRMADO, EM_PREPARO, EM_ENTREGA); só some
+    // quando o pedido já está no histórico (ENTREGUE ou CANCELADO).
+    final podeConfirmarEntrega = pedido.status != 'ENTREGUE' && pedido.status != 'CANCELADO';
     final endereco = pedido.enderecosUsuario.isNotEmpty ? pedido.enderecosUsuario.first : null;
 
     return Column(
@@ -309,18 +261,18 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
                     ),
                   ),
                 ],
-                if (acao != null) ...[
+                if (podeConfirmarEntrega) ...[
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: acao.cor,
+                        backgroundColor: _kVerdeEntrega,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      onPressed: _atualizandoStatus ? null : () => _executarAcao(acao),
+                      onPressed: _atualizandoStatus ? null : _confirmarEntrega,
                       icon: _atualizandoStatus
                           ? const SizedBox(
                               width: 18,
@@ -328,7 +280,7 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.check_circle_outline),
-                      label: Text(acao.textoBotao, style: const TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.6)),
+                      label: const Text('CONFIRMAR ENTREGA', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.6)),
                     ),
                   ),
                 ],

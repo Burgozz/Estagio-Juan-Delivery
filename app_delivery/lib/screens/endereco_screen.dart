@@ -1,12 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import '../models/endereco.dart';
 import '../services/endereco_service.dart';
 import '../utils/sessao_usuario.dart';
+import '../widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);
 const kTextPrimary = Color(0xFF212121);
 const kTextSecondary = Color(0xFF757575);
+const kAutoFillColor = Color(0xFFF0E8EF);
 
 /// Lista os endereços do usuário logado (GET /usuarios/{id}/enderecos),
 /// permitindo cadastrar novos e excluir existentes.
@@ -163,6 +168,31 @@ class _EnderecoScreenState extends State<EnderecoScreen> {
   }
 }
 
+/// Formata o texto digitado no campo CEP para o padrão XXXXX-XXX,
+/// inserindo o hífen automaticamente logo após o quinto dígito.
+/// Deve ser combinado com [FilteringTextInputFormatter.digitsOnly] antes
+/// dele na lista de inputFormatters, para que dígitos já sejam a única
+/// entrada recebida aqui.
+class _CepInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digitos = newValue.text.length > 8 ? newValue.text.substring(0, 8) : newValue.text;
+    final buffer = StringBuffer();
+    for (var i = 0; i < digitos.length; i++) {
+      buffer.write(digitos[i]);
+      if (i == 4) buffer.write('-');
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
 class _EnderecoFormScreen extends StatefulWidget {
   const _EnderecoFormScreen();
 
@@ -180,6 +210,21 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
   final _cepCtrl = TextEditingController();
   final _service = EnderecoService();
   bool _salvando = false;
+  bool _buscandoCep = false;
+
+  // Marca quais campos foram preenchidos automaticamente pela busca do
+  // ViaCEP, para exibir o fundo diferenciado (kAutoFillColor) e para saber
+  // quando o próprio usuário os editou manualmente (o que remove o destaque).
+  bool _ruaAutoPreenchida = false;
+  bool _bairroAutoPreenchido = false;
+  bool _cidadeAutoPreenchida = false;
+  bool _estadoAutoPreenchido = false;
+
+  // Enquanto true, as alterações feitas nos controllers são causadas pelo
+  // próprio preenchimento automático (ou pela sua limpeza), não pelo
+  // usuário — usado para não derrubar as flags de auto-preenchimento acima
+  // dentro dos onChanged dos campos.
+  bool _preenchendoAuto = false;
 
   // Erros de validação retornados pelo backend (GlobalExceptionHandler),
   // exibidos embaixo do campo correspondente seguindo o mesmo padrão usado
@@ -190,6 +235,69 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
   String? _cidadeApiError;
   String? _estadoApiError;
   String? _cepApiError;
+
+  Future<void> _buscarCep(String cep) async {
+    setState(() => _buscandoCep = true);
+    try {
+      final response = await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map && data['erro'] != true) {
+          _preenchendoAuto = true;
+          setState(() {
+            _ruaCtrl.text = (data['logradouro'] ?? '').toString();
+            _bairroCtrl.text = (data['bairro'] ?? '').toString();
+            _cidadeCtrl.text = (data['localidade'] ?? '').toString();
+            _estadoCtrl.text = (data['uf'] ?? '').toString();
+            _ruaAutoPreenchida = true;
+            _bairroAutoPreenchido = true;
+            _cidadeAutoPreenchida = true;
+            _estadoAutoPreenchido = true;
+          });
+          _preenchendoAuto = false;
+        } else {
+          _limparCamposAuto();
+          _mostrarErroCep('CEP não encontrado. Verifique e tente novamente.');
+        }
+      } else {
+        _limparCamposAuto();
+        _mostrarErroCep('Erro ao buscar CEP. Verifique sua internet.');
+      }
+    } catch (_) {
+      _limparCamposAuto();
+      _mostrarErroCep('Erro ao buscar CEP. Verifique sua internet.');
+    } finally {
+      if (mounted) setState(() => _buscandoCep = false);
+    }
+  }
+
+  void _limparCamposAuto() {
+    _preenchendoAuto = true;
+    if (mounted) {
+      setState(() {
+        _ruaCtrl.clear();
+        _bairroCtrl.clear();
+        _cidadeCtrl.clear();
+        _estadoCtrl.clear();
+        _ruaAutoPreenchida = false;
+        _bairroAutoPreenchido = false;
+        _cidadeAutoPreenchida = false;
+        _estadoAutoPreenchido = false;
+      });
+    }
+    _preenchendoAuto = false;
+  }
+
+  void _mostrarErroCep(String mensagem) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: Colors.red.shade700,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -219,7 +327,7 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
       bairro: _bairroCtrl.text.trim(),
       cidade: _cidadeCtrl.text.trim(),
       estado: _estadoCtrl.text.trim(),
-      cep: _cepCtrl.text.trim(),
+      cep: _cepCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
     );
     try {
       await _service.criar(SessaoUsuario.id!, endereco);
@@ -273,15 +381,58 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                controller: _cepCtrl,
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  _CepInputFormatter(),
+                  LengthLimitingTextInputFormatter(9),
+                ],
+                decoration: InputDecoration(
+                  label: LabelObrigatorio('CEP'),
+                  hintText: 'Ex: 01310-100',
+                  prefixIcon: const Icon(Icons.markunread_mailbox_outlined, color: kTextSecondary, size: 20),
+                  suffixIcon: _buscandoCep
+                      ? const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary),
+                          ),
+                        )
+                      : null,
+                ),
+                onChanged: (v) {
+                  if (_cepApiError != null) setState(() => _cepApiError = null);
+                  final digitos = v.replaceAll(RegExp(r'[^0-9]'), '');
+                  if (digitos.length == 8) _buscarCep(digitos);
+                },
+                validator: (v) {
+                  final digitos = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                  if (digitos.isEmpty) return 'Informe o CEP';
+                  if (digitos.length != 8) return 'CEP deve ter 8 dígitos';
+                  if (_cepApiError != null) return _cepApiError;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
                 controller: _ruaCtrl,
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
-                decoration: const InputDecoration(
-                  labelText: 'Rua *',
-                  prefixIcon: Icon(Icons.signpost_outlined, color: kTextSecondary, size: 20),
+                decoration: InputDecoration(
+                  label: LabelObrigatorio('Rua'),
+                  prefixIcon: const Icon(Icons.signpost_outlined, color: kTextSecondary, size: 20),
+                  fillColor: _ruaAutoPreenchida ? kAutoFillColor : null,
                 ),
                 onChanged: (_) {
                   if (_ruaApiError != null) setState(() => _ruaApiError = null);
+                  if (!_preenchendoAuto && _ruaAutoPreenchida) {
+                    setState(() => _ruaAutoPreenchida = false);
+                  }
                 },
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Informe a rua';
@@ -295,7 +446,7 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
                 decoration: const InputDecoration(
-                  labelText: 'Número *',
+                  label: LabelObrigatorio('Número'),
                   prefixIcon: Icon(Icons.pin_outlined, color: kTextSecondary, size: 20),
                 ),
                 onChanged: (_) {
@@ -312,12 +463,16 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
                 controller: _bairroCtrl,
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
-                decoration: const InputDecoration(
-                  labelText: 'Bairro *',
-                  prefixIcon: Icon(Icons.holiday_village_outlined, color: kTextSecondary, size: 20),
+                decoration: InputDecoration(
+                  label: LabelObrigatorio('Bairro'),
+                  prefixIcon: const Icon(Icons.holiday_village_outlined, color: kTextSecondary, size: 20),
+                  fillColor: _bairroAutoPreenchido ? kAutoFillColor : null,
                 ),
                 onChanged: (_) {
                   if (_bairroApiError != null) setState(() => _bairroApiError = null);
+                  if (!_preenchendoAuto && _bairroAutoPreenchido) {
+                    setState(() => _bairroAutoPreenchido = false);
+                  }
                 },
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Informe o bairro';
@@ -330,12 +485,16 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
                 controller: _cidadeCtrl,
                 style: const TextStyle(color: kTextPrimary),
                 cursorColor: kPrimary,
-                decoration: const InputDecoration(
-                  labelText: 'Cidade *',
-                  prefixIcon: Icon(Icons.location_city_outlined, color: kTextSecondary, size: 20),
+                decoration: InputDecoration(
+                  label: LabelObrigatorio('Cidade'),
+                  prefixIcon: const Icon(Icons.location_city_outlined, color: kTextSecondary, size: 20),
+                  fillColor: _cidadeAutoPreenchida ? kAutoFillColor : null,
                 ),
                 onChanged: (_) {
                   if (_cidadeApiError != null) setState(() => _cidadeApiError = null);
+                  if (!_preenchendoAuto && _cidadeAutoPreenchida) {
+                    setState(() => _cidadeAutoPreenchida = false);
+                  }
                 },
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Informe a cidade';
@@ -350,38 +509,22 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
                 cursorColor: kPrimary,
                 textCapitalization: TextCapitalization.characters,
                 maxLength: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Estado (UF) *',
+                decoration: InputDecoration(
+                  label: LabelObrigatorio('Estado (UF)'),
                   hintText: 'Ex: SP',
-                  prefixIcon: Icon(Icons.map_outlined, color: kTextSecondary, size: 20),
+                  prefixIcon: const Icon(Icons.map_outlined, color: kTextSecondary, size: 20),
                   counterText: '',
+                  fillColor: _estadoAutoPreenchido ? kAutoFillColor : null,
                 ),
                 onChanged: (_) {
                   if (_estadoApiError != null) setState(() => _estadoApiError = null);
+                  if (!_preenchendoAuto && _estadoAutoPreenchido) {
+                    setState(() => _estadoAutoPreenchido = false);
+                  }
                 },
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Informe o estado';
                   if (_estadoApiError != null) return _estadoApiError;
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _cepCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'CEP *',
-                  hintText: 'Ex: 01310-100',
-                  prefixIcon: Icon(Icons.markunread_mailbox_outlined, color: kTextSecondary, size: 20),
-                ),
-                onChanged: (_) {
-                  if (_cepApiError != null) setState(() => _cepApiError = null);
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe o CEP';
-                  if (_cepApiError != null) return _cepApiError;
                   return null;
                 },
               ),

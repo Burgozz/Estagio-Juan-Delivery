@@ -56,6 +56,17 @@ const _banners = [
   _BannerInfo('Novos acessórios chegaram', 'Taças, decanters e muito mais', Color(0xFF8C2F63)),
 ];
 
+/// Intervalo entre as trocas automáticas do carrossel.
+const _kIntervaloBanner = Duration(seconds: 7);
+
+/// Duração da animação de transição entre banners.
+const _kTransicaoBanner = Duration(milliseconds: 600);
+
+/// Página inicial do carrossel infinito: alta e múltipla da quantidade de
+/// banners, para o usuário poder arrastar para os dois lados sem chegar ao
+/// fim e começar no primeiro banner.
+final _kPaginaInicialBanner = 1000 * _banners.length;
+
 class _ExplorarInfo {
   final String titulo;
   final String emoji;
@@ -78,12 +89,17 @@ class InicioScreen extends StatefulWidget {
   State<InicioScreen> createState() => _InicioScreenState();
 }
 
-class _InicioScreenState extends State<InicioScreen> {
+class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver {
   final _service = ProdutoService();
   final _buscaCtrl = TextEditingController();
-  final _bannerCtrl = PageController();
+  final _bannerCtrl = PageController(initialPage: _kPaginaInicialBanner);
   Timer? _bannerTimer;
   int _bannerIndex = 0;
+
+  // Condições para a passagem automática rodar.
+  bool _rotaVisivel = true;
+  bool _appAtivo = true;
+  bool _arrastandoBanner = false;
 
   String? _nomeUsuario;
   List<Produto> _produtos = [];
@@ -101,23 +117,64 @@ class _InicioScreenState extends State<InicioScreen> {
     _buscaCtrl.addListener(() {
       setState(() => _termoBusca = _buscaCtrl.text.trim().toLowerCase());
     });
-    _bannerTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted || !_bannerCtrl.hasClients) return;
-      final proximo = (_bannerIndex + 1) % _banners.length;
-      _bannerCtrl.animateToPage(
-        proximo,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // isCurrent fica false quando outra tela é aberta por cima desta.
+    _rotaVisivel = ModalRoute.of(context)?.isCurrent ?? true;
+    _reiniciarTimerBanner();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appAtivo = state == AppLifecycleState.resumed;
+    _reiniciarTimerBanner();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _bannerTimer?.cancel();
     _buscaCtrl.dispose();
     _bannerCtrl.dispose();
-    _bannerTimer?.cancel();
     super.dispose();
+  }
+
+  /// Cancela o timer atual e, se a tela estiver visível e o usuário não
+  /// estiver arrastando, começa uma nova contagem de [_kIntervaloBanner].
+  void _reiniciarTimerBanner() {
+    _bannerTimer?.cancel();
+    _bannerTimer = null;
+    if (!_rotaVisivel || !_appAtivo || _arrastandoBanner) return;
+    _bannerTimer = Timer.periodic(_kIntervaloBanner, (_) => _avancarBanner());
+  }
+
+  /// Sempre segue para a próxima página (nunca volta ao início), já que o
+  /// PageView é infinito.
+  void _avancarBanner() {
+    if (!mounted || !_bannerCtrl.hasClients) return;
+    final atual = _bannerCtrl.page?.round() ?? _kPaginaInicialBanner;
+    _bannerCtrl.animateToPage(
+      atual + 1,
+      duration: _kTransicaoBanner,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  /// Pausa a passagem automática enquanto o usuário arrasta o carrossel e
+  /// reinicia a contagem quando ele solta.
+  bool _onBannerScroll(ScrollNotification n) {
+    if (n is ScrollStartNotification && n.dragDetails != null) {
+      _arrastandoBanner = true;
+      _reiniciarTimerBanner();
+    } else if (n is ScrollEndNotification && _arrastandoBanner) {
+      _arrastandoBanner = false;
+      _reiniciarTimerBanner();
+    }
+    return false;
   }
 
   Future<void> _carregarNomeUsuario() async {
@@ -335,40 +392,44 @@ class _InicioScreenState extends State<InicioScreen> {
       children: [
         SizedBox(
           height: 140,
-          child: PageView.builder(
-            controller: _bannerCtrl,
-            itemCount: _banners.length,
-            onPageChanged: (i) => setState(() => _bannerIndex = i),
-            itemBuilder: (_, i) {
-              final b = _banners[i];
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: b.cor,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(color: b.cor.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6)),
-                  ],
-                ),
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      b.titulo,
-                      style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      b.subtitulo,
-                      style: const TextStyle(color: _kCreme, fontSize: 13),
-                    ),
-                  ],
-                ),
-              );
-            },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _onBannerScroll,
+            // Sem itemCount: o carrossel é infinito e o índice com módulo
+            // escolhe qual banner exibir.
+            child: PageView.builder(
+              controller: _bannerCtrl,
+              onPageChanged: (i) => setState(() => _bannerIndex = i % _banners.length),
+              itemBuilder: (_, i) {
+                final b = _banners[i % _banners.length];
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: b.cor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(color: b.cor.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6)),
+                    ],
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        b.titulo,
+                        style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        b.subtitulo,
+                        style: const TextStyle(color: _kCreme, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 12),

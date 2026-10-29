@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import '../filters/produto_filtro.dart';
+import '../filters/status_filtro.dart';
+import '../filters/texto_busca.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
+import '../widgets/barra_busca_filtros.dart';
+import '../widgets/filtro_chip.dart';
+import '../widgets/painel_filtros.dart';
+import '../widgets/resultados_header.dart';
+import '../widgets/status_chips.dart';
 import 'produto_form_screen.dart';
 
 const kPrimary = Color(0xFF3C0731);
@@ -16,7 +24,14 @@ class ProdutoListScreen extends StatefulWidget {
 
 class _ProdutoListScreenState extends State<ProdutoListScreen> {
   final service = ProdutoService();
-  late Future<List<Produto>> _produtos;
+  final _buscaCtrl = TextEditingController();
+  List<Produto>? _produtos;
+  bool _carregando = true;
+  Object? _erro;
+
+  // Fica no State (e não no carregamento), então sobrevive aos recarregamentos
+  // feitos depois de editar ou excluir.
+  ProdutoFiltro _filtro = const ProdutoFiltro();
 
   @override
   void initState() {
@@ -24,9 +39,151 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
     _carregar();
   }
 
-  void _carregar() {
-    _produtos = service.listarTodosAdmin();
-    setState(() {});
+  @override
+  void dispose() {
+    _buscaCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _carregar() async {
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
+    try {
+      final lista = await service.listarTodosAdmin();
+      if (!mounted) return;
+      setState(() {
+        _produtos = lista;
+        _carregando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _erro = e;
+        _carregando = false;
+      });
+    }
+  }
+
+  void _limparFiltros() {
+    _buscaCtrl.clear();
+    setState(() => _filtro = const ProdutoFiltro());
+  }
+
+  Future<void> _abrirFiltros() async {
+    final faixa = faixaDePreco(_produtos ?? const []);
+    final escolhido = await abrirPainelFiltros<ProdutoFiltro>(
+      context: context,
+      rascunho: _filtro,
+      limpar: (f) => f.limparAvancados(),
+      construir: (f, atualizar) => [
+        SecaoFiltro(
+          titulo: 'Tipo',
+          child: Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final t in TipoFiltro.values)
+              FiltroChip(
+                label: t.label,
+                selecionado: f.tipo == t,
+                onTap: () => atualizar(f.copyWith(
+                  tipo: t,
+                  categorias: t == TipoFiltro.acessorios ? const {} : null,
+                )),
+              ),
+          ]),
+        ),
+        if (f.categoriaVisivel)
+          SecaoFiltro(
+            titulo: 'Categoria',
+            child: Wrap(spacing: 8, runSpacing: 8, children: [
+              FiltroChip(
+                label: 'Todas',
+                selecionado: f.categorias.isEmpty,
+                onTap: () => atualizar(f.copyWith(categorias: const {})),
+              ),
+              for (final c in categoriasProduto.entries)
+                FiltroChip(
+                  label: c.value,
+                  selecionado: f.categorias.contains(c.key),
+                  onTap: () {
+                    final novas = {...f.categorias};
+                    if (!novas.remove(c.key)) novas.add(c.key);
+                    atualizar(f.copyWith(categorias: novas));
+                  },
+                ),
+            ]),
+          ),
+        SecaoFiltro(
+          titulo: 'Estoque',
+          child: Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final e in EstoqueFiltro.values)
+              FiltroChip(
+                label: e.label,
+                selecionado: f.estoque == e,
+                onTap: () => atualizar(f.copyWith(estoque: e)),
+              ),
+          ]),
+        ),
+        SecaoFiltro(
+          titulo: 'Faixa de preço',
+          child: _buildFaixaPreco(f, faixa, atualizar),
+        ),
+        SecaoFiltro(
+          titulo: 'Ordenar por',
+          child: Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final o in OrdenacaoProduto.values)
+              FiltroChip(
+                label: o.label,
+                selecionado: f.ordenacao == o,
+                onTap: () => atualizar(f.copyWith(ordenacao: o)),
+              ),
+          ]),
+        ),
+      ],
+    );
+    if (escolhido == null || !mounted) return;
+    // Busca e status vêm do estado atual (o debounce pode ter disparado com
+    // o painel aberto); do painel só interessam os filtros avançados.
+    setState(() => _filtro = escolhido.copyWith(busca: _filtro.busca, status: _filtro.status));
+  }
+
+  Widget _buildFaixaPreco(
+    ProdutoFiltro f,
+    ({double min, double max}) faixa,
+    void Function(ProdutoFiltro) atualizar,
+  ) {
+    if (faixa.max <= faixa.min) {
+      return const DicaFiltro('Todos os produtos têm o mesmo preço.');
+    }
+    final valores = RangeValues(
+      (f.precoMin ?? faixa.min).clamp(faixa.min, faixa.max),
+      (f.precoMax ?? faixa.max).clamp(faixa.min, faixa.max),
+    );
+    final amplitude = (faixa.max - faixa.min).round();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${formatarReais(valores.start)}  –  ${formatarReais(valores.end)}',
+          style: const TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
+        ),
+        RangeSlider(
+          values: valores,
+          min: faixa.min,
+          max: faixa.max,
+          divisions: amplitude <= 500 ? amplitude : null,
+          activeColor: kPrimary,
+          inactiveColor: kPrimary.withValues(alpha: 0.15),
+          labels: RangeLabels(formatarReais(valores.start), formatarReais(valores.end)),
+          // Encostado no limite = sem limite, assim produtos novos mais
+          // caros/baratos continuam aparecendo depois de recarregar.
+          onChanged: (v) => atualizar(f.comPreco(
+            v.start <= faixa.min ? null : v.start,
+            v.end >= faixa.max ? null : v.end,
+          )),
+        ),
+      ],
+    );
   }
 
   Future<void> _deletar(int id, String nome) async {
@@ -36,11 +193,12 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text(
-          'Confirmar exclusão',
+          'Excluir produto?',
           style: TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Tem certeza que deseja excluir o produto "$nome"?',
+          'O produto $nome será removido definitivamente da plataforma. '
+          'Esta ação não pode ser desfeita.',
           style: const TextStyle(color: kTextPrimary),
         ),
         actions: [
@@ -50,31 +208,39 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
+            style: TextButton.styleFrom(foregroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Excluir', style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
-    if (confirmar == true) {
+    if (confirmar != true || !mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
       await service.deletar(id);
-      _carregar();
+      // _filtro fica no State, então os filtros aplicados são mantidos.
+      await _carregar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text('Produto excluído'),
+          backgroundColor: Colors.green.shade700,
+        ),
+      );
+    } catch (e) {
+      // Ex.: produto com pedidos -> backend orienta a zerar o estoque.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red.shade700,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 
-  String _labelCategoria(String? cat) {
-    const map = {
-      'VINHO_TINTO': 'Tinto',
-      'VINHO_BRANCO': 'Branco',
-      'VINHO_ROSE': 'Rosé',
-      'VINHO_ESPUMANTE': 'Espumante',
-      'VINHO_SOBREMESA': 'Sobremesa',
-      'VINHO_ORGANICO': 'Orgânico',
-      'VINHO_IMPORTADO': 'Importado',
-    };
-    return map[cat] ?? cat ?? '-';
-  }
+  String _labelCategoria(String? cat) => categoriasProduto[cat] ?? cat ?? '-';
 
   @override
   Widget build(BuildContext context) {
@@ -89,52 +255,91 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
           _carregar();
         },
       ),
-      body: FutureBuilder<List<Produto>>(
-        future: _produtos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: kPrimary));
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
-          }
-          final produtos = snapshot.data!;
-          if (produtos.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.wine_bar_outlined, size: 64, color: kPrimary),
-                  SizedBox(height: 16),
-                  Text('Nenhum produto cadastrado.',
-                      style: TextStyle(color: kTextSecondary, fontSize: 16)),
-                ],
-              ),
-            );
-          }
-          final ativos = produtos.where((p) => p.ativo).toList()
-            ..sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
-          final inativos = produtos.where((p) => !p.ativo).toList()
-            ..sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
-          return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            children: [
-              ...ativos.map((p) => _buildProdutoCard(p, inativo: false)),
-              if (inativos.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.only(top: 8, bottom: 12),
-                  child: Text(
-                    'Inativos',
-                    style: TextStyle(
-                        color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
-                  ),
-                ),
-                ...inativos.map((p) => _buildProdutoCard(p, inativo: true)),
-              ],
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          BarraBuscaFiltros(
+            controller: _buscaCtrl,
+            hint: 'Nome, descrição, país ou marca',
+            filtrosAtivos: _filtro.avancadosAtivos,
+            onBusca: (t) => setState(() => _filtro = _filtro.copyWith(busca: t)),
+            onFiltros: _abrirFiltros,
+          ),
+          StatusChips(
+            selecionado: _filtro.status,
+            onChanged: (st) => setState(() => _filtro = _filtro.copyWith(status: st)),
+          ),
+          Expanded(child: _buildConteudo()),
+        ],
       ),
+    );
+  }
+
+  Widget _buildConteudo() {
+    if (_carregando) {
+      return const Center(child: CircularProgressIndicator(color: kPrimary));
+    }
+    if (_erro != null) {
+      return Center(child: Text('Erro: $_erro'));
+    }
+    final produtos = _produtos ?? const <Produto>[];
+    if (produtos.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.wine_bar_outlined, size: 64, color: kPrimary),
+            SizedBox(height: 16),
+            Text('Nenhum produto cadastrado.',
+                style: TextStyle(color: kTextSecondary, fontSize: 16)),
+          ],
+        ),
+      );
+    }
+
+    final filtrados = _filtro.aplicar(produtos);
+    return Column(
+      children: [
+        ResultadosHeader(
+          total: filtrados.length,
+          filtrosAtivos: _filtro.temFiltroAtivo,
+          onLimpar: _limparFiltros,
+        ),
+        Expanded(
+          child: filtrados.isEmpty
+              ? SemResultados(onLimpar: _limparFiltros)
+              : _buildLista(filtrados),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLista(List<Produto> filtrados) {
+    const padding = EdgeInsets.fromLTRB(20, 4, 20, 88);
+    // Com status "Ativos" ou "Inativos" a lista já é de um tipo só.
+    if (_filtro.status != StatusFiltro.todos) {
+      return ListView(
+        padding: padding,
+        children: filtrados.map((p) => _buildProdutoCard(p, inativo: !p.ativo)).toList(),
+      );
+    }
+    final ativos = filtrados.where((p) => p.ativo);
+    final inativos = filtrados.where((p) => !p.ativo);
+    return ListView(
+      padding: padding,
+      children: [
+        ...ativos.map((p) => _buildProdutoCard(p, inativo: false)),
+        if (inativos.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 12),
+            child: Text(
+              'Inativos',
+              style: TextStyle(
+                  color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+          ),
+          ...inativos.map((p) => _buildProdutoCard(p, inativo: true)),
+        ],
+      ],
     );
   }
 

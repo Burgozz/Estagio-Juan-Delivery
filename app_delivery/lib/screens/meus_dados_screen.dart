@@ -3,19 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
-import '../utils/cpf_formatter.dart';
+import '../utils/input_formatters.dart';
+import '../utils/cpf_validator.dart';
 import '../utils/sessao_usuario.dart';
+import '../widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);
 const kTextPrimary = Color(0xFF212121);
 const kTextSecondary = Color(0xFF757575);
-
-/// Formata os 11 dígitos de um CPF no padrão XXX.XXX.XXX-XX para exibição.
-String _formatarCpf(String digits) {
-  if (digits.length != 11) return digits;
-  return '${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6, 9)}-${digits.substring(9)}';
-}
 
 /// Exibe os dados do usuário logado (buscados via GET /usuarios/{id}, já
 /// que a sessão guarda apenas nome/e-mail) e permite editá-los.
@@ -122,11 +118,11 @@ class _MeusDadosScreenState extends State<MeusDadosScreen> {
       children: [
         _DadoCard(icone: Icons.person_outline, label: 'Nome', valor: usuario.nome),
         _DadoCard(icone: Icons.email_outlined, label: 'E-mail', valor: usuario.email),
-        _DadoCard(icone: Icons.badge_outlined, label: 'CPF', valor: _formatarCpf(usuario.cpf)),
+        _DadoCard(icone: Icons.badge_outlined, label: 'CPF', valor: formatarCpf(usuario.cpf)),
         _DadoCard(
           icone: Icons.phone_outlined,
           label: 'Telefone',
-          valor: (usuario.telefone == null || usuario.telefone!.isEmpty) ? 'Não informado' : usuario.telefone!,
+          valor: (usuario.telefone == null || usuario.telefone!.isEmpty) ? 'Não informado' : formatarTelefone(usuario.telefone),
         ),
         const SizedBox(height: 12),
         ElevatedButton(
@@ -195,9 +191,9 @@ class _MeusDadosForm extends StatefulWidget {
 class _MeusDadosFormState extends State<_MeusDadosForm> {
   final _formKey = GlobalKey<FormState>();
   late final _nomeCtrl = TextEditingController(text: widget.usuario.nome);
-  late final _cpfCtrl = TextEditingController(text: _formatarCpf(widget.usuario.cpf));
+  late final _cpfCtrl = TextEditingController(text: formatarCpf(widget.usuario.cpf));
   late final _emailCtrl = TextEditingController(text: widget.usuario.email);
-  late final _telefoneCtrl = TextEditingController(text: widget.usuario.telefone ?? '');
+  late final _telefoneCtrl = TextEditingController(text: formatarTelefone(widget.usuario.telefone));
   final _service = UsuarioService();
   bool _salvando = false;
   String? _emailApiError;
@@ -226,10 +222,10 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
     final atualizado = Usuario(
       id: widget.usuario.id,
       nome: _nomeCtrl.text.trim(),
-      cpf: _cpfCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
+      cpf: somenteDigitos(_cpfCtrl.text),
       email: _emailCtrl.text.trim(),
       senha: widget.usuario.senha,
-      telefone: _telefoneCtrl.text.trim().isEmpty ? null : _telefoneCtrl.text.trim(),
+      telefone: somenteDigitos(_telefoneCtrl.text).isEmpty ? null : somenteDigitos(_telefoneCtrl.text),
       dataCadastro: widget.usuario.dataCadastro,
     );
     try {
@@ -277,7 +273,7 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
               cursorColor: kPrimary,
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ ]'))],
               decoration: const InputDecoration(
-                labelText: 'Nome *',
+                label: LabelObrigatorio('Nome'),
                 prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
               ),
               onChanged: (_) {
@@ -296,9 +292,9 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
               style: const TextStyle(color: kTextPrimary),
               cursorColor: kPrimary,
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, CpfInputFormatter()],
+              inputFormatters: [CpfInputFormatter()],
               decoration: const InputDecoration(
-                labelText: 'CPF *',
+                label: LabelObrigatorio('CPF'),
                 hintText: 'XXX.XXX.XXX-XX',
                 prefixIcon: Icon(Icons.badge_outlined, color: kTextSecondary, size: 20),
               ),
@@ -306,9 +302,9 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
                 if (_cpfApiError != null) setState(() => _cpfApiError = null);
               },
               validator: (v) {
-                final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                final digits = somenteDigitos(v);
                 if (digits.isEmpty) return 'Informe o CPF';
-                if (digits.length != 11) return 'CPF deve ter exatamente 11 dígitos';
+                if (!cpfValido(digits)) return 'CPF inválido';
                 if (_cpfApiError != null) return _cpfApiError;
                 return null;
               },
@@ -323,7 +319,7 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
                 if (_emailApiError != null) setState(() => _emailApiError = null);
               },
               decoration: const InputDecoration(
-                labelText: 'Email *',
+                label: LabelObrigatorio('Email'),
                 prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
               ),
               validator: (v) {
@@ -339,20 +335,21 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
               controller: _telefoneCtrl,
               style: const TextStyle(color: kTextPrimary),
               cursorColor: kPrimary,
-              keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(11)],
+              keyboardType: TextInputType.number,
+              inputFormatters: [TelefoneInputFormatter()],
               decoration: const InputDecoration(
                 labelText: 'Telefone',
-                hintText: 'Ex: 11987654321',
+                hintText: '(XX) XXXXX-XXXX',
                 prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
               ),
               onChanged: (_) {
                 if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
               },
               validator: (v) {
-                if (v == null || v.isEmpty) return _telefoneApiError;
-                if (v.length < 10 || v.length > 11) return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
-                if (v[0] == '0') return 'DDD inválido (não pode começar com 0)';
+                final digits = somenteDigitos(v);
+                if (digits.isEmpty) return _telefoneApiError;
+                if (digits.length < 10 || digits.length > 11) return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
+                if (digits[0] == '0') return 'DDD inválido (não pode começar com 0)';
                 if (_telefoneApiError != null) return _telefoneApiError;
                 return null;
               },

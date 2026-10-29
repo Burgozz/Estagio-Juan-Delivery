@@ -4,6 +4,7 @@ import com.juan.api_delivery.dto.UsuarioDTO;
 import com.juan.api_delivery.model.PerfilUsuario;
 import com.juan.api_delivery.model.Usuario;
 import com.juan.api_delivery.repository.UsuarioRepository;
+import com.juan.api_delivery.validation.CpfValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,14 @@ public class UsuarioService {
         return repository.findByAtivoTrue();
     }
 
+    /**
+     * Usado pela tela de administração: retorna todos os usuários,
+     * incluindo os inativos.
+     */
+    public List<Usuario> listarTodosAdmin() {
+        return repository.findAll();
+    }
+
     public Usuario buscarPorId(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -34,7 +43,7 @@ public class UsuarioService {
                 throw new IllegalArgumentException("Email já cadastrado");
             }
             usuario.setNome(dto.getNome());
-            usuario.setCpf(dto.getCpf());
+            usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
             usuario.setSenha(dto.getSenha());
             usuario.setTelefone(dto.getTelefone());
             usuario.setDataCadastro(LocalDate.now());
@@ -44,7 +53,7 @@ public class UsuarioService {
         }
         Usuario usuario = Usuario.builder()
         .nome(dto.getNome())
-        .cpf(dto.getCpf())
+        .cpf(CpfValidator.somenteDigitos(dto.getCpf()))
         .email(dto.getEmail())
         .senha(dto.getSenha())
         .telefone(dto.getTelefone())
@@ -60,7 +69,7 @@ public class UsuarioService {
         .filter(u -> !u.getId().equals(id))
         .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
     usuario.setNome(dto.getNome());
-    usuario.setCpf(dto.getCpf());
+    usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
     usuario.setEmail(dto.getEmail());
     usuario.setSenha(dto.getSenha());
     usuario.setTelefone(dto.getTelefone());

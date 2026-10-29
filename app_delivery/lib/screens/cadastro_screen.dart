@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
 import '../utils/auth_theme.dart';
-import '../utils/cpf_formatter.dart';
+import '../utils/input_formatters.dart';
+import '../utils/cpf_validator.dart';
 import 'login_screen.dart';
 
 class CadastroScreen extends StatefulWidget {
@@ -50,10 +51,10 @@ class _CadastroScreenState extends State<CadastroScreen> {
     setState(() => _carregando = true);
     final usuario = Usuario(
       nome: _nomeCtrl.text.trim(),
-      cpf: _cpfCtrl.text.replaceAll(RegExp(r'[^0-9]'), ''),
+      cpf: somenteDigitos(_cpfCtrl.text),
       email: _emailCtrl.text.trim(),
       senha: _senhaCtrl.text.trim(),
-      telefone: _telefoneCtrl.text.trim(),
+      telefone: somenteDigitos(_telefoneCtrl.text),
     );
     try {
       await _service.criar(usuario);
@@ -148,10 +149,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   style: const TextStyle(color: kAuthFieldText),
                   cursorColor: kAuthFieldBorderFocused,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    CpfInputFormatter(),
-                  ],
+                  inputFormatters: [CpfInputFormatter()],
                   decoration: authInputDecoration(
                     label: 'CPF',
                     hint: 'XXX.XXX.XXX-XX',
@@ -161,11 +159,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     if (_cpfApiError != null) setState(() => _cpfApiError = null);
                   },
                   validator: (v) {
-                    final digits = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                    final digits = somenteDigitos(v);
                     if (digits.isEmpty) return 'Informe o CPF';
-                    if (digits.length != 11) {
-                      return 'CPF deve ter exatamente 11 dígitos';
-                    }
+                    if (!cpfValido(digits)) return 'CPF inválido';
                     if (_cpfApiError != null) return _cpfApiError;
                     return null;
                   },
@@ -175,18 +171,23 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   controller: _telefoneCtrl,
                   style: const TextStyle(color: kAuthFieldText),
                   cursorColor: kAuthFieldBorderFocused,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [TelefoneInputFormatter()],
                   decoration: authInputDecoration(
                     label: 'Telefone',
-                    hint: 'Ex: 11987654321',
+                    hint: '(XX) XXXXX-XXXX',
                     icon: Icons.phone_outlined,
                   ),
                   onChanged: (_) {
                     if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
                   },
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Informe o telefone';
+                    final digits = somenteDigitos(v);
+                    if (digits.isEmpty) return 'Informe o telefone';
+                    if (digits.length < 10 || digits.length > 11) {
+                      return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
+                    }
+                    if (digits[0] == '0') return 'DDD inválido (não pode começar com 0)';
                     if (_telefoneApiError != null) return _telefoneApiError;
                     return null;
                   },

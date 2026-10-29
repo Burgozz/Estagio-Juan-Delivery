@@ -23,6 +23,15 @@ public class UsuarioController {
         return ResponseEntity.ok(service.listarTodos());
     }
 
+    /**
+     * Usado pela tela de administração: retorna todos os usuários,
+     * incluindo os inativos.
+     */
+    @GetMapping("/admin")
+    public ResponseEntity<List<Usuario>> listarTodosAdmin() {
+        return ResponseEntity.ok(service.listarTodosAdmin());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.buscarPorId(id));

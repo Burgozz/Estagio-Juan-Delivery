@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../screens/produto_form_screen.dart' show kPrimary, kTextPrimary, kTextSecondary;
 import '../utils/paises.dart';
+import 'label_obrigatorio.dart';
 
 /// Remove acentos e normaliza para minúsculas, para permitir busca e
 /// validação de país sem distinção entre maiúsculas/minúsculas e ignorando
@@ -105,50 +106,57 @@ class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
             offset: Offset(0, altura + 4),
             child: Align(
               alignment: Alignment.topLeft,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 5 * 48.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: _opcoesFiltradas.length,
-                      itemBuilder: (context, index) {
-                        final pais = _opcoesFiltradas[index];
-                        return InkWell(
-                          onTap: () => _selecionarPais(pais),
-                          child: SizedBox(
-                            height: 48,
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 16),
-                                Text(pais['bandeira']!, style: const TextStyle(fontSize: 20)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    pais['nome']!,
-                                    style: const TextStyle(fontSize: 16, color: kTextPrimary),
+              // TextFieldTapRegion faz o toque na lista contar como "dentro"
+              // do campo; sem isso, no Web/desktop o campo perde o foco no
+              // pointer-down e a lista é removida antes do onTap do item.
+              // Precisa ficar dentro do follower para usar a posição já
+              // deslocada no hit test.
+              child: TextFieldTapRegion(
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 5 * 48.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: _opcoesFiltradas.length,
+                        itemBuilder: (context, index) {
+                          final pais = _opcoesFiltradas[index];
+                          return InkWell(
+                            onTap: () => _selecionarPais(pais),
+                            child: SizedBox(
+                              height: 48,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 16),
+                                  Text(pais['bandeira']!, style: const TextStyle(fontSize: 20)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      pais['nome']!,
+                                      style: const TextStyle(fontSize: 16, color: kTextPrimary),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                              ],
+                                  const SizedBox(width: 16),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -196,7 +204,7 @@ class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
         cursorColor: kPrimary,
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s]'))],
         decoration: const InputDecoration(
-          labelText: 'País de Origem da Uva *',
+          label: LabelObrigatorio('País de Origem da Uva'),
           prefixIcon: Icon(Icons.flag_outlined, color: kTextSecondary, size: 20),
         ),
         validator: widget.validator,

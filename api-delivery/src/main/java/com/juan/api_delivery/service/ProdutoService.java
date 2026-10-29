@@ -9,6 +9,7 @@ import com.juan.api_delivery.model.Acessorio;
 import com.juan.api_delivery.model.Produto;
 import com.juan.api_delivery.model.TipoProduto;
 import com.juan.api_delivery.model.Vinho;
+import com.juan.api_delivery.repository.ItemPedidoRepository;
 import com.juan.api_delivery.repository.ProdutoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ProdutoService {
 
     private final ProdutoRepository repository;
+    private final ItemPedidoRepository itemPedidoRepository;
 
     public List<Produto> listarAtivos() {
         return repository.findByAtivoTrue();
@@ -25,7 +27,7 @@ public class ProdutoService {
 
     /**
      * Usado pela tela de administração: retorna todos os produtos,
-     * incluindo os inativos (desativados por estoque zerado ou exclusão).
+     * incluindo os inativos (desativados por estoque zerado).
      */
     public List<Produto> listarTodos() {
         return repository.findAll();
@@ -126,10 +128,18 @@ public class ProdutoService {
             .build();
     }
 
+    /**
+     * Exclusão definitiva. Produto que já aparece em algum pedido não pode
+     * ser apagado (o histórico de pedidos depende dele); nesse caso o admin
+     * deve zerar o estoque, o que o deixa inativo.
+     */
     public void deletar(Long id) {
         Produto produto = buscarPorId(id);
-        produto.setAtivo(false);
-        repository.save(produto);
+        if (itemPedidoRepository.existsByProdutoId(produto.getId())) {
+            throw new IllegalArgumentException(
+                "Este produto já possui pedidos e não pode ser excluído. Para removê-lo do catálogo, zere o estoque.");
+        }
+        repository.deleteById(produto.getId());
     }
 
     private void validarCamposPorTipo(ProdutoDTO dto) {

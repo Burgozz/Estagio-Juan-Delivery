@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +37,9 @@ public class ProdutoDTO {
     @Max(value = 2026, message = "Safra não pode ser maior que o ano atual")
     private Integer safra;
     private Double teorAlcool;
+    // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
+    @Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s,.\\-/]+$", message = "Harmonização deve conter apenas letras e pontuação simples")
+    @Size(min = 3, max = 150, message = "Harmonização deve ter entre 3 e 150 caracteres")
     private String harmonizacao;
 
     // Campos específicos de Acessorio

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
 import '../utils/sessao_usuario.dart';
+import '../widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);
@@ -101,7 +102,7 @@ class _AlterarSenhaScreenState extends State<AlterarSenhaScreen> {
                 cursorColor: kPrimary,
                 obscureText: !_mostrarAtual,
                 decoration: InputDecoration(
-                  labelText: 'Senha atual *',
+                  label: LabelObrigatorio('Senha atual'),
                   prefixIcon: const Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(_mostrarAtual ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
@@ -117,7 +118,7 @@ class _AlterarSenhaScreenState extends State<AlterarSenhaScreen> {
                 cursorColor: kPrimary,
                 obscureText: !_mostrarNova,
                 decoration: InputDecoration(
-                  labelText: 'Nova senha *',
+                  label: LabelObrigatorio('Nova senha'),
                   prefixIcon: const Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(_mostrarNova ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
@@ -137,7 +138,7 @@ class _AlterarSenhaScreenState extends State<AlterarSenhaScreen> {
                 cursorColor: kPrimary,
                 obscureText: !_mostrarConfirmar,
                 decoration: InputDecoration(
-                  labelText: 'Confirmar nova senha *',
+                  label: LabelObrigatorio('Confirmar nova senha'),
                   prefixIcon: const Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(_mostrarConfirmar ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
