@@ -5,8 +5,7 @@ import com.juan.api_delivery.pedido.ItemPedido;
 import com.juan.api_delivery.pedido.Pedido;
 import com.juan.api_delivery.pedido.StatusPedido;
 import com.juan.api_delivery.shared.IntegracaoBase;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.juan.api_delivery.shared.validation.SafraValida;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,15 +117,20 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
     class Limites {
 
         @ParameterizedTest
-        @ValueSource(ints = {1900, 2000, 2025})
+        @ValueSource(ints = {1900, 2000})
         void safraDentroDoLimitePassa(int safra) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("safra", safra);
             criar(corpo);
         }
 
-        // BUG ENCONTRADO: o CLAUDE.md e a entidade Vinho (@Min(1800)) aceitam
-        // safras a partir de 1800, mas ProdutoDTO tem @Min(1900).
+        @Test
+        void safraDoAnoAtualPassa() throws Exception {
+            Map<String, Object> corpo = vinho();
+            corpo.put("safra", Year.now().getValue());
+            criar(corpo);
+        }
+
         @Test
         void safra1800Passa() throws Exception {
             Map<String, Object> corpo = vinho();
@@ -141,29 +146,23 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erros").isArray());
         }
 
-        // BUG ENCONTRADO: ProdutoDTO aceita safra 2026 (@Max(2026)), mas a entidade
-        // Vinho tem @Max(2025). O pedido passa no @Valid e explode na gravação, com
-        // {"erro": "<texto técnico>"} em vez de {"erros": [...]}.
         @Test
-        void safraAcimaDoMaximoRetorna400NoFormatoErros() throws Exception {
+        void safraDepoisDoAnoAtualRetorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = vinho();
-            corpo.put("safra", 2026);
+            corpo.put("safra", Year.now().getValue() + 1);
             postJson("/produtos", corpo).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.erros").isArray());
+                .andExpect(jsonPath("$.erros", hasItem("Safra deve estar entre 1800 e o ano atual")));
+            assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: limites de safra divergentes entre a entidade e o DTO
-        // (Vinho: 1800–2025; ProdutoDTO: 1900–2026).
+        // Entidade e DTO usam a mesma regra (1800 até o ano atual), para o erro
+        // sempre sair no @Valid, no formato {"erros": [...]}.
         @Test
         void limitesDeSafraSaoIguaisNaEntidadeENoDto() throws Exception {
             var safraVinho = Vinho.class.getDeclaredField("safra");
             var safraDto = ProdutoDTO.class.getDeclaredField("safra");
-            assertThat(safraDto.getAnnotation(Max.class).value())
-                .as("@Max de safra: ProdutoDTO x Vinho")
-                .isEqualTo(safraVinho.getAnnotation(Max.class).value());
-            assertThat(safraDto.getAnnotation(Min.class).value())
-                .as("@Min de safra: ProdutoDTO x Vinho")
-                .isEqualTo(safraVinho.getAnnotation(Min.class).value());
+            assertThat(safraVinho.isAnnotationPresent(SafraValida.class)).as("@SafraValida em Vinho.safra").isTrue();
+            assertThat(safraDto.isAnnotationPresent(SafraValida.class)).as("@SafraValida em ProdutoDTO.safra").isTrue();
         }
 
         @ParameterizedTest

@@ -16,7 +16,7 @@ public final class MensagensErro {
     public static final String NOME_TAMANHO = "Nome deve ter entre 2 e 100 caracteres";
     public static final String SENHA_TAMANHO = "Senha deve ter no mínimo 6 caracteres";
     public static final String ESTOQUE_NEGATIVO = "Estoque não pode ser negativo";
-    public static final String SAFRA_INVALIDA = "Safra inválida";
+    public static final String SAFRA_INVALIDA = "Safra deve estar entre 1800 e o ano atual";
 
     private MensagensErro() {
     }

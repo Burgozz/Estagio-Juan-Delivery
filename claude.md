@@ -139,7 +139,7 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 - CPF: exatamente 11 dígitos numéricos
 - Telefone: 10 ou 11 dígitos numéricos
 - CEP: exatamente 8 dígitos numéricos
-- Safra: entre 1800 e 2025
+- Safra: entre 1800 e o ano atual (`@SafraValida`, calculado com `Year.now()`)
 - Teor alcoólico: entre 0.0 e 100.0
 - Email único por usuário
 - Todos os novos usuários criados via cadastro recebem perfil CLIENTE

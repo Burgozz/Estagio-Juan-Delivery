@@ -2,9 +2,9 @@ package com.juan.api_delivery.produto;
 
 import java.math.BigDecimal;
 
+import com.juan.api_delivery.shared.validation.SafraValida;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,8 +32,7 @@ public class ProdutoDTO {
     // Campos específicos de Vinho
     private CategoriaProduto categoria;
     private String paisOrigem;
-    @Min(value = 1900, message = "Safra deve ser a partir de 1900")
-    @Max(value = 2026, message = "Safra não pode ser maior que o ano atual")
+    @SafraValida
     private Integer safra;
     private Double teorAlcool;
     // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
