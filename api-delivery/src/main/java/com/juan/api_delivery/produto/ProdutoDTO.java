@@ -41,7 +41,12 @@ public class ProdutoDTO {
     @DecimalMax(value = "100.0", message = TEOR_ALCOOL_INVALIDO)
     private Double teorAlcool;
     // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
-    @Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s,.\\-/]+$", message = "Harmonização deve conter apenas letras e pontuação simples")
+    // O lookahead exige no mínimo 3 letras (igual ao app), para recusar texto só
+    // com pontuação, como ", , .".
+    @Pattern(
+        regexp = "^(?=(?:[^a-zA-ZÀ-ÿ]*[a-zA-ZÀ-ÿ]){3})[a-zA-ZÀ-ÿ\\s,.\\-/]+$",
+        message = "Harmonização deve conter apenas letras e pontuação simples"
+    )
     @Size(min = 3, max = 150, message = "Harmonização deve ter entre 3 e 150 caracteres")
     private String harmonizacao;
 
@@ -67,5 +72,10 @@ public class ProdutoDTO {
     @AssertTrue(message = "Teor alcoólico é obrigatório para vinhos")
     public boolean isTeorAlcoolValido() {
         return tipo != TipoProduto.VINHO || teorAlcool != null;
+    }
+
+    @AssertTrue(message = "Harmonização é obrigatória para vinhos")
+    public boolean isHarmonizacaoValida() {
+        return tipo != TipoProduto.VINHO || (harmonizacao != null && !harmonizacao.isBlank());
     }
 }

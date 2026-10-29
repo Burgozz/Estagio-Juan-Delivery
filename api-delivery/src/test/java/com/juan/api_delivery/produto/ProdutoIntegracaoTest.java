@@ -211,9 +211,6 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: o @Pattern de ProdutoDTO.harmonizacao aceita texto só com
-        // pontuação (", , ." tem 5 caracteres permitidos). O Flutter exige ao menos
-        // 3 letras, o backend não.
         @Test
         void harmonizacaoSoComPontuacaoRetorna400() throws Exception {
             Map<String, Object> corpo = vinho();
@@ -223,8 +220,6 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: ProdutoDTO não exige harmonização para vinho; quem barra é o
-        // @NotBlank da entidade, com erro fora do padrão {"erros": [...]}.
         @Test
         void vinhoSemHarmonizacaoRetorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = vinho();
