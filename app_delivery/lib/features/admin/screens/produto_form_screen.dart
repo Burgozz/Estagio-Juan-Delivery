@@ -345,8 +345,10 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 }
                 final ano = int.tryParse(v);
                 if (ano == null) return 'Ano inválido';
-                if (ano < 1900 || ano > 2026) {
-                  return 'Safra deve ser entre 1900 e 2026';
+                // Mesma regra do backend (@SafraValida): 1800 até o ano atual.
+                final anoAtual = DateTime.now().year;
+                if (ano < 1800 || ano > anoAtual) {
+                  return 'Safra deve ser entre 1800 e $anoAtual';
                 }
                 return _safraApiError;
               },

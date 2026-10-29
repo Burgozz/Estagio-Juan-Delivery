@@ -123,19 +123,42 @@ void main() {
       expect(find.widgetWithText(TextFormField, 'Queijos  meses '), findsOneWidget);
     });
 
-    // BUG ENCONTRADO: o app valida safra entre 1900 e 2026 (igual ao ProdutoDTO),
-    // mas o CLAUDE.md e a entidade Vinho definem 1800–2025. Resultado: 2026 passa
-    // no app e é recusada na gravação com mensagem técnica; 1800 é recusada no app.
-    testWidgets('safra segue a regra do projeto (1800 a 2025)', (tester) async {
+    // Regra do projeto (igual ao backend): safra de 1800 até o ano atual.
+    testWidgets('safra depois do ano atual é barrada no app', (tester) async {
+      final proximoAno = DateTime.now().year + 1;
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
         await _abrir(tester);
-        await _preencherVinho(tester, safra: '2026');
+        await _preencherVinho(tester, safra: '$proximoAno');
         await _salvar(tester);
         await tester.pump(const Duration(seconds: 1));
       });
-      expect(api.requisicoes, isEmpty, reason: 'safra 2026 deveria ser barrada no app');
+      expect(api.requisicoes, isEmpty, reason: 'safra $proximoAno deveria ser barrada no app');
     });
+
+    testWidgets('safra antes de 1800 é barrada no app', (tester) async {
+      final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
+      await api.executar(() async {
+        await _abrir(tester);
+        await _preencherVinho(tester, safra: '1799');
+        await _salvar(tester);
+        await tester.pump(const Duration(seconds: 1));
+      });
+      expect(api.requisicoes, isEmpty, reason: 'safra 1799 deveria ser barrada no app');
+    });
+
+    for (final safra in ['1800', '${DateTime.now().year}']) {
+      testWidgets('safra $safra é aceita e enviada para a API', (tester) async {
+        final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
+        await api.executar(() async {
+          await _abrir(tester);
+          await _preencherVinho(tester, safra: safra);
+          await _salvar(tester);
+          await tester.pump(const Duration(seconds: 1));
+        });
+        expect(api.corpoJson(api.doMetodo('POST').single)['safra'], int.parse(safra));
+      });
+    }
 
     testWidgets('estoque 0 é bloqueado na criação', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
