@@ -84,9 +84,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             assertThat(usuarioRepository.findByEmailIgnoreCase("invalido@teste.com")).isEmpty();
         }
 
-        // BUG ENCONTRADO: CpfValidator.somenteDigitos remove QUALQUER caractere que
-        // não seja dígito (não só a máscara), então letras no meio de um CPF válido
-        // são descartadas e o cadastro é aceito.
         @ParameterizedTest
         @ValueSource(strings = {"111a444b777c35", "CPF11144477735"})
         void cpfComLetrasMisturadasRetorna400(String cpf) throws Exception {

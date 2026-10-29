@@ -46,5 +46,15 @@ class CpfValidatorTest {
     @Test
     void cpfComMascaraPassa() {
         assertTrue(CpfValidator.isValido("111.444.777-35"));
+        assertTrue(CpfValidator.isValido("111444777-35"));
+        assertTrue(CpfValidator.isValido("000.000.000-00"));
+    }
+
+    @Test
+    void letrasOuEspacosNoMeioDeUmCpfValidoFalham() {
+        assertFalse(CpfValidator.isValido("111a444b777c35"));
+        assertFalse(CpfValidator.isValido("CPF11144477735"));
+        assertFalse(CpfValidator.isValido("111 444 777 35"));
+        assertFalse(CpfValidator.isValido("111/444/777-35"));
     }
 }

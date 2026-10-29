@@ -1,5 +1,7 @@
 package com.juan.api_delivery.shared.validation;
 
+import java.util.regex.Pattern;
+
 /**
  * Validação de CPF por dígitos verificadores (módulo 11).
  */
@@ -11,6 +13,13 @@ public final class CpfValidator {
      */
     public static final String CPF_CORINGA = "00000000000";
 
+    /**
+     * Formatos aceitos: só dígitos ("11144477735") ou com a máscara, completa ou
+     * parcial ("111.444.777-35"). Qualquer outro caractere (letras, espaços)
+     * invalida o CPF, em vez de ser descartado.
+     */
+    private static final Pattern FORMATO = Pattern.compile("^\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}$");
+
     private CpfValidator() {
     }
 
@@ -19,7 +28,7 @@ public final class CpfValidator {
     }
 
     public static boolean isValido(String cpf) {
-        if (cpf == null) {
+        if (cpf == null || !FORMATO.matcher(cpf).matches()) {
             return false;
         }
         String digitos = somenteDigitos(cpf);
