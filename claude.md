@@ -102,9 +102,10 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 
 ## Testes
 - Backend: `mvn test` (integração em H2, perfil `test`). Frontend: `flutter test`
-- Alguns testes falham de propósito: documentam bugs conhecidos, marcados com o comentário
-  `BUG ENCONTRADO` (validações que só existem na entidade e não no DTO, limites de safra divergentes,
-  senha do admin com 5 caracteres etc.). Não "corrigir" o teste; corrigir o código
+- Todos os testes devem passar. Se um teste novo documentar um bug, marque-o com o comentário
+  `BUG ENCONTRADO`; ao corrigir, corrija o código, não o teste
+- Validações de entrada ficam no DTO (para o erro sair como `{"erros": [...]}`); a entidade só
+  repete o que também vale para dados criados direto no banco (ex.: o admin padrão, senha `admin`)
 
 ## Entidades Principais
 - `Usuario`: id, nome, email, senha, telefone, cpf, dataCadastro, ativo, perfil
