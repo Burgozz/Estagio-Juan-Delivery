@@ -3,22 +3,10 @@ import 'package:http/http.dart' as http;
 import '../../../core/config/api_config.dart';
 import '../models/pedido.dart';
 import '../models/item_pedido.dart';
+import '../../../core/network/api_erro.dart';
 
 class PedidoService {
   final String baseUrl = '${ApiConfig.baseUrl}/pedidos';
-
-  String _parseErro(http.Response response) {
-    try {
-      final body = jsonDecode(response.body);
-      if (body is Map) {
-        if (body['erros'] is List) {
-          return (body['erros'] as List).join('\n');
-        }
-        if (body['erro'] != null) return body['erro'].toString();
-      }
-    } catch (_) {}
-    return 'Erro ${response.statusCode}';
-  }
 
   /// Cria o pedido (POST /pedidos) e retorna o id gerado. O backend
   /// (PedidoDTO) só usa o campo usuarioId, calculando status, dataPedido e
@@ -39,7 +27,7 @@ class PedidoService {
       }),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
     final data = jsonDecode(response.body);
     return data['id'] as int;
@@ -62,14 +50,14 @@ class PedidoService {
       }),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
   }
 
   Future<Pedido> buscarPorId(int id) async {
     final response = await http.get(Uri.parse('$baseUrl/$id'));
     if (response.statusCode != 200) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
     return Pedido.fromJson(jsonDecode(response.body));
   }
@@ -79,7 +67,7 @@ class PedidoService {
   Future<List<Pedido>> listarPorUsuario(int usuarioId) async {
     final response = await http.get(Uri.parse('$baseUrl/usuario/$usuarioId'));
     if (response.statusCode != 200) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
     final List data = jsonDecode(response.body);
     return data.map((e) => Pedido.fromJson(e)).toList();
@@ -88,7 +76,7 @@ class PedidoService {
   Future<List<ItemPedido>> listarItensPorPedido(int pedidoId) async {
     final response = await http.get(Uri.parse('$baseUrl/$pedidoId/itens'));
     if (response.statusCode != 200) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
     final List data = jsonDecode(response.body);
     return data.map((e) => ItemPedido.fromJson(e)).toList();
@@ -100,7 +88,7 @@ class PedidoService {
     final uri = Uri.parse('$baseUrl/$id/status').replace(queryParameters: {'status': status});
     final response = await http.patch(uri);
     if (response.statusCode != 200) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
   }
 }

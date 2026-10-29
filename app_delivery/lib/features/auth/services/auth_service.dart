@@ -1,22 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../core/config/api_config.dart';
+import '../../../core/network/api_erro.dart';
 
 class AuthService {
   final String baseUrl = '${ApiConfig.baseUrl}/auth';
-
-  String _parseErro(http.Response response) {
-    try {
-      final body = jsonDecode(response.body);
-      if (body is Map) {
-        if (body['erros'] is List) {
-          return (body['erros'] as List).join('\n');
-        }
-        if (body['erro'] != null) return body['erro'].toString();
-      }
-    } catch (_) {}
-    return 'Erro ${response.statusCode}';
-  }
 
   /// Realiza o login e retorna os dados básicos do usuário
   /// ({id, nome, email}). Lança [Exception] com a mensagem da API
@@ -28,7 +16,7 @@ class AuthService {
       body: jsonEncode({'email': email, 'senha': senha}),
     );
     if (response.statusCode != 200) {
-      throw Exception(_parseErro(response));
+      throw Exception(parseErro(response));
     }
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
