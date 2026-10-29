@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/item_pedido.dart';
 import '../models/pedido.dart';
+import '../../perfil/models/endereco.dart';
 import '../services/pedido_service.dart';
 import 'pedido_concluido_screen.dart';
 import '../../../core/theme/app_colors.dart';
@@ -184,43 +185,7 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3)),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Pedido #${pedido.id}',
-                            style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 18),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(20)),
-                            child: Text(
-                              label,
-                              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        pedido.dataPedido != null ? _formatarData(pedido.dataPedido!) : '-',
-                        style: const TextStyle(color: kTextSecondary, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildCabecalho(pedido, cor, label),
                 const SizedBox(height: 20),
                 const Text('Itens', style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 12),
@@ -229,60 +194,11 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
                   const SizedBox(height: 8),
                   const Text('Endereço de entrega', style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3)),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.location_on, color: kPrimary, size: 22),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${endereco.rua}, ${endereco.numero}',
-                                style: const TextStyle(color: kTextPrimary, fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(endereco.bairro, style: const TextStyle(color: kTextSecondary, fontSize: 13)),
-                              Text('${endereco.cidade} - ${endereco.estado}', style: const TextStyle(color: kTextSecondary, fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildEndereco(endereco),
                 ],
                 if (podeConfirmarEntrega) ...[
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _kVerdeEntrega,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: _atualizandoStatus ? null : _confirmarEntrega,
-                      icon: _atualizandoStatus
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.check_circle_outline),
-                      label: const Text('CONFIRMAR ENTREGA', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.6)),
-                    ),
-                  ),
+                  _buildBotaoConfirmarEntrega(),
                 ],
               ],
             ),
@@ -290,6 +206,103 @@ class _DetalhesPedidoScreenState extends State<DetalhesPedidoScreen> {
         ),
         _buildRodapeTotal(),
       ],
+    );
+  }
+
+  Widget _buildCabecalho(Pedido pedido, Color cor, String label) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Pedido #${pedido.id}',
+                style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 18),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  label,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            pedido.dataPedido != null ? _formatarData(pedido.dataPedido!) : '-',
+            style: const TextStyle(color: kTextSecondary, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEndereco(Endereco endereco) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.location_on, color: kPrimary, size: 22),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${endereco.rua}, ${endereco.numero}',
+                  style: const TextStyle(color: kTextPrimary, fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(endereco.bairro, style: const TextStyle(color: kTextSecondary, fontSize: 13)),
+                Text('${endereco.cidade} - ${endereco.estado}', style: const TextStyle(color: kTextSecondary, fontSize: 13)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBotaoConfirmarEntrega() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _kVerdeEntrega,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: _atualizandoStatus ? null : _confirmarEntrega,
+        icon: _atualizandoStatus
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            : const Icon(Icons.check_circle_outline),
+        label: const Text('CONFIRMAR ENTREGA', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.6)),
+      ),
     );
   }
 

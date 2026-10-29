@@ -170,85 +170,17 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'VINHO', label: Text('Vinho'), icon: Icon(Icons.wine_bar_outlined)),
-                  ButtonSegment(value: 'ACESSORIO', label: Text('Acessório'), icon: Icon(Icons.local_mall_outlined)),
-                ],
-                selected: {_tipo},
-                onSelectionChanged: isEditing
-                    ? null
-                    : (selecao) => setState(() => _tipo = selecao.first),
-                style: SegmentedButton.styleFrom(
-                  selectedBackgroundColor: kPrimary,
-                  selectedForegroundColor: Colors.white,
-                ),
-              ),
+              _buildSeletorTipo(isEditing),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _nomeCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                decoration: const InputDecoration(
-                  label: LabelObrigatorio('Nome do Produto'),
-                  prefixIcon: Icon(Icons.label_outline, color: kTextSecondary, size: 20),
-                ),
-                validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
-              ),
+              _buildCampoNome(),
               const SizedBox(height: 20),
               if (_isVinho) ..._camposVinho() else ..._camposAcessorio(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _precoCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  label: LabelObrigatorio('Preço (R\$)'),
-                  prefixIcon: Icon(Icons.attach_money, color: kTextSecondary, size: 20),
-                ),
-                validator: (v) {
-                  if (v!.isEmpty) return 'Informe o preço';
-                  final preco = double.tryParse(v.trim());
-                  if (preco == null) return 'Valor inválido';
-                  if (preco < 0) return 'O preço não pode ser negativo';
-                  return null;
-                },
-              ),
+              _buildCampoPreco(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _descricaoCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  prefixIcon: Icon(Icons.notes, color: kTextSecondary, size: 20),
-                  alignLabelWithHint: true,
-                ),
-              ),
+              _buildCampoDescricao(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _estoqueCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: const InputDecoration(
-                  label: LabelObrigatorio('Estoque (unidades)'),
-                  prefixIcon: Icon(Icons.inventory_2_outlined, color: kTextSecondary, size: 20),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Informe o estoque';
-                  final qtd = int.tryParse(v);
-                  if (qtd == null) return 'Valor inválido';
-                  if (!isEditing && qtd <= 0) {
-                    return 'Estoque inicial deve ser maior que zero';
-                  }
-                  if (qtd < 0) return 'Estoque não pode ser negativo';
-                  return null;
-                },
-              ),
+              _buildCampoEstoque(isEditing),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -261,6 +193,94 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSeletorTipo(bool isEditing) {
+    return SegmentedButton<String>(
+      segments: const [
+        ButtonSegment(value: 'VINHO', label: Text('Vinho'), icon: Icon(Icons.wine_bar_outlined)),
+        ButtonSegment(value: 'ACESSORIO', label: Text('Acessório'), icon: Icon(Icons.local_mall_outlined)),
+      ],
+      selected: {_tipo},
+      onSelectionChanged: isEditing
+          ? null
+          : (selecao) => setState(() => _tipo = selecao.first),
+      style: SegmentedButton.styleFrom(
+        selectedBackgroundColor: kPrimary,
+        selectedForegroundColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildCampoNome() {
+    return TextFormField(
+      controller: _nomeCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Nome do Produto'),
+        prefixIcon: Icon(Icons.label_outline, color: kTextSecondary, size: 20),
+      ),
+      validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
+    );
+  }
+
+  Widget _buildCampoPreco() {
+    return TextFormField(
+      controller: _precoCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Preço (R\$)'),
+        prefixIcon: Icon(Icons.attach_money, color: kTextSecondary, size: 20),
+      ),
+      validator: (v) {
+        if (v!.isEmpty) return 'Informe o preço';
+        final preco = double.tryParse(v.trim());
+        if (preco == null) return 'Valor inválido';
+        if (preco < 0) return 'O preço não pode ser negativo';
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoDescricao() {
+    return TextFormField(
+      controller: _descricaoCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      maxLines: 3,
+      decoration: const InputDecoration(
+        labelText: 'Descrição',
+        prefixIcon: Icon(Icons.notes, color: kTextSecondary, size: 20),
+        alignLabelWithHint: true,
+      ),
+    );
+  }
+
+  Widget _buildCampoEstoque(bool isEditing) {
+    return TextFormField(
+      controller: _estoqueCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Estoque (unidades)'),
+        prefixIcon: Icon(Icons.inventory_2_outlined, color: kTextSecondary, size: 20),
+      ),
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Informe o estoque';
+        final qtd = int.tryParse(v);
+        if (qtd == null) return 'Valor inválido';
+        if (!isEditing && qtd <= 0) {
+          return 'Estoque inicial deve ser maior que zero';
+        }
+        if (qtd < 0) return 'Estoque não pode ser negativo';
+        return null;
+      },
     );
   }
 

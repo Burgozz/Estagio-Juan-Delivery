@@ -375,169 +375,197 @@ class _EnderecoFormScreenState extends State<_EnderecoFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                controller: _cepCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  _CepInputFormatter(),
-                  LengthLimitingTextInputFormatter(9),
-                ],
-                decoration: InputDecoration(
-                  label: LabelObrigatorio('CEP'),
-                  hintText: 'Ex: 01310-100',
-                  prefixIcon: const Icon(Icons.markunread_mailbox_outlined, color: kTextSecondary, size: 20),
-                  suffixIcon: _buscandoCep
-                      ? const Padding(
-                          padding: EdgeInsets.all(14),
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary),
-                          ),
-                        )
-                      : null,
-                ),
-                onChanged: (v) {
-                  if (_cepApiError != null) setState(() => _cepApiError = null);
-                  final digitos = v.replaceAll(RegExp(r'[^0-9]'), '');
-                  if (digitos.length == 8) _buscarCep(digitos);
-                },
-                validator: (v) {
-                  final digitos = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-                  if (digitos.isEmpty) return 'Informe o CEP';
-                  if (digitos.length != 8) return 'CEP deve ter 8 dígitos';
-                  if (_cepApiError != null) return _cepApiError;
-                  return null;
-                },
-              ),
+              _buildCampoCep(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _ruaCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                decoration: InputDecoration(
-                  label: LabelObrigatorio('Rua'),
-                  prefixIcon: const Icon(Icons.signpost_outlined, color: kTextSecondary, size: 20),
-                  fillColor: _ruaAutoPreenchida ? kAutoFillColor : null,
-                ),
-                onChanged: (_) {
-                  if (_ruaApiError != null) setState(() => _ruaApiError = null);
-                  if (!_preenchendoAuto && _ruaAutoPreenchida) {
-                    setState(() => _ruaAutoPreenchida = false);
-                  }
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe a rua';
-                  if (_ruaApiError != null) return _ruaApiError;
-                  return null;
-                },
-              ),
+              _buildCampoRua(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _numeroCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                decoration: const InputDecoration(
-                  label: LabelObrigatorio('Número'),
-                  prefixIcon: Icon(Icons.pin_outlined, color: kTextSecondary, size: 20),
-                ),
-                onChanged: (_) {
-                  if (_numeroApiError != null) setState(() => _numeroApiError = null);
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe o número';
-                  if (_numeroApiError != null) return _numeroApiError;
-                  return null;
-                },
-              ),
+              _buildCampoNumero(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _bairroCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                decoration: InputDecoration(
-                  label: LabelObrigatorio('Bairro'),
-                  prefixIcon: const Icon(Icons.holiday_village_outlined, color: kTextSecondary, size: 20),
-                  fillColor: _bairroAutoPreenchido ? kAutoFillColor : null,
-                ),
-                onChanged: (_) {
-                  if (_bairroApiError != null) setState(() => _bairroApiError = null);
-                  if (!_preenchendoAuto && _bairroAutoPreenchido) {
-                    setState(() => _bairroAutoPreenchido = false);
-                  }
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe o bairro';
-                  if (_bairroApiError != null) return _bairroApiError;
-                  return null;
-                },
-              ),
+              _buildCampoBairro(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _cidadeCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                decoration: InputDecoration(
-                  label: LabelObrigatorio('Cidade'),
-                  prefixIcon: const Icon(Icons.location_city_outlined, color: kTextSecondary, size: 20),
-                  fillColor: _cidadeAutoPreenchida ? kAutoFillColor : null,
-                ),
-                onChanged: (_) {
-                  if (_cidadeApiError != null) setState(() => _cidadeApiError = null);
-                  if (!_preenchendoAuto && _cidadeAutoPreenchida) {
-                    setState(() => _cidadeAutoPreenchida = false);
-                  }
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe a cidade';
-                  if (_cidadeApiError != null) return _cidadeApiError;
-                  return null;
-                },
-              ),
+              _buildCampoCidade(),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _estadoCtrl,
-                style: const TextStyle(color: kTextPrimary),
-                cursorColor: kPrimary,
-                textCapitalization: TextCapitalization.characters,
-                maxLength: 2,
-                decoration: InputDecoration(
-                  label: LabelObrigatorio('Estado (UF)'),
-                  hintText: 'Ex: SP',
-                  prefixIcon: const Icon(Icons.map_outlined, color: kTextSecondary, size: 20),
-                  counterText: '',
-                  fillColor: _estadoAutoPreenchido ? kAutoFillColor : null,
-                ),
-                onChanged: (_) {
-                  if (_estadoApiError != null) setState(() => _estadoApiError = null);
-                  if (!_preenchendoAuto && _estadoAutoPreenchido) {
-                    setState(() => _estadoAutoPreenchido = false);
-                  }
-                },
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Informe o estado';
-                  if (_estadoApiError != null) return _estadoApiError;
-                  return null;
-                },
-              ),
+              _buildCampoEstado(),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _salvando ? null : _salvar,
-                child: _salvando
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Text('SALVAR ENDEREÇO'),
-              ),
+              _buildBotaoSalvar(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCampoCep() {
+    return TextFormField(
+      controller: _cepCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        _CepInputFormatter(),
+        LengthLimitingTextInputFormatter(9),
+      ],
+      decoration: InputDecoration(
+        label: LabelObrigatorio('CEP'),
+        hintText: 'Ex: 01310-100',
+        prefixIcon: const Icon(Icons.markunread_mailbox_outlined, color: kTextSecondary, size: 20),
+        suffixIcon: _buscandoCep
+            ? const Padding(
+                padding: EdgeInsets.all(14),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary),
+                ),
+              )
+            : null,
+      ),
+      onChanged: (v) {
+        if (_cepApiError != null) setState(() => _cepApiError = null);
+        final digitos = v.replaceAll(RegExp(r'[^0-9]'), '');
+        if (digitos.length == 8) _buscarCep(digitos);
+      },
+      validator: (v) {
+        final digitos = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+        if (digitos.isEmpty) return 'Informe o CEP';
+        if (digitos.length != 8) return 'CEP deve ter 8 dígitos';
+        if (_cepApiError != null) return _cepApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoRua() {
+    return TextFormField(
+      controller: _ruaCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      decoration: InputDecoration(
+        label: LabelObrigatorio('Rua'),
+        prefixIcon: const Icon(Icons.signpost_outlined, color: kTextSecondary, size: 20),
+        fillColor: _ruaAutoPreenchida ? kAutoFillColor : null,
+      ),
+      onChanged: (_) {
+        if (_ruaApiError != null) setState(() => _ruaApiError = null);
+        if (!_preenchendoAuto && _ruaAutoPreenchida) {
+          setState(() => _ruaAutoPreenchida = false);
+        }
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe a rua';
+        if (_ruaApiError != null) return _ruaApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoNumero() {
+    return TextFormField(
+      controller: _numeroCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Número'),
+        prefixIcon: Icon(Icons.pin_outlined, color: kTextSecondary, size: 20),
+      ),
+      onChanged: (_) {
+        if (_numeroApiError != null) setState(() => _numeroApiError = null);
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe o número';
+        if (_numeroApiError != null) return _numeroApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoBairro() {
+    return TextFormField(
+      controller: _bairroCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      decoration: InputDecoration(
+        label: LabelObrigatorio('Bairro'),
+        prefixIcon: const Icon(Icons.holiday_village_outlined, color: kTextSecondary, size: 20),
+        fillColor: _bairroAutoPreenchido ? kAutoFillColor : null,
+      ),
+      onChanged: (_) {
+        if (_bairroApiError != null) setState(() => _bairroApiError = null);
+        if (!_preenchendoAuto && _bairroAutoPreenchido) {
+          setState(() => _bairroAutoPreenchido = false);
+        }
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe o bairro';
+        if (_bairroApiError != null) return _bairroApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoCidade() {
+    return TextFormField(
+      controller: _cidadeCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      decoration: InputDecoration(
+        label: LabelObrigatorio('Cidade'),
+        prefixIcon: const Icon(Icons.location_city_outlined, color: kTextSecondary, size: 20),
+        fillColor: _cidadeAutoPreenchida ? kAutoFillColor : null,
+      ),
+      onChanged: (_) {
+        if (_cidadeApiError != null) setState(() => _cidadeApiError = null);
+        if (!_preenchendoAuto && _cidadeAutoPreenchida) {
+          setState(() => _cidadeAutoPreenchida = false);
+        }
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe a cidade';
+        if (_cidadeApiError != null) return _cidadeApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoEstado() {
+    return TextFormField(
+      controller: _estadoCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      textCapitalization: TextCapitalization.characters,
+      maxLength: 2,
+      decoration: InputDecoration(
+        label: LabelObrigatorio('Estado (UF)'),
+        hintText: 'Ex: SP',
+        prefixIcon: const Icon(Icons.map_outlined, color: kTextSecondary, size: 20),
+        counterText: '',
+        fillColor: _estadoAutoPreenchido ? kAutoFillColor : null,
+      ),
+      onChanged: (_) {
+        if (_estadoApiError != null) setState(() => _estadoApiError = null);
+        if (!_preenchendoAuto && _estadoAutoPreenchido) {
+          setState(() => _estadoAutoPreenchido = false);
+        }
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe o estado';
+        if (_estadoApiError != null) return _estadoApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildBotaoSalvar() {
+    return ElevatedButton(
+      onPressed: _salvando ? null : _salvar,
+      child: _salvando
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            )
+          : const Text('SALVAR ENDEREÇO'),
     );
   }
 }

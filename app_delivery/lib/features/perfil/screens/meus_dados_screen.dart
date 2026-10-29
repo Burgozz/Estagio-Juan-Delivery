@@ -263,93 +263,13 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _nomeCtrl,
-              style: const TextStyle(color: kTextPrimary),
-              cursorColor: kPrimary,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ ]'))],
-              decoration: const InputDecoration(
-                label: LabelObrigatorio('Nome'),
-                prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
-              ),
-              onChanged: (_) {
-                if (_nomeApiError != null) setState(() => _nomeApiError = null);
-              },
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Informe o nome';
-                if (!RegExp(r'^[a-zA-ZÀ-ÿ ]+$').hasMatch(v)) return 'Nome deve conter apenas letras';
-                if (_nomeApiError != null) return _nomeApiError;
-                return null;
-              },
-            ),
+            _buildCampoNome(),
             const SizedBox(height: 20),
-            TextFormField(
-              controller: _cpfCtrl,
-              style: const TextStyle(color: kTextPrimary),
-              cursorColor: kPrimary,
-              keyboardType: TextInputType.number,
-              inputFormatters: [CpfInputFormatter()],
-              decoration: const InputDecoration(
-                label: LabelObrigatorio('CPF'),
-                hintText: 'XXX.XXX.XXX-XX',
-                prefixIcon: Icon(Icons.badge_outlined, color: kTextSecondary, size: 20),
-              ),
-              onChanged: (_) {
-                if (_cpfApiError != null) setState(() => _cpfApiError = null);
-              },
-              validator: (v) {
-                final digits = somenteDigitos(v);
-                if (digits.isEmpty) return 'Informe o CPF';
-                if (!cpfValido(digits)) return 'CPF inválido';
-                if (_cpfApiError != null) return _cpfApiError;
-                return null;
-              },
-            ),
+            _buildCampoCpf(),
             const SizedBox(height: 20),
-            TextFormField(
-              controller: _emailCtrl,
-              style: const TextStyle(color: kTextPrimary),
-              cursorColor: kPrimary,
-              keyboardType: TextInputType.emailAddress,
-              onChanged: (_) {
-                if (_emailApiError != null) setState(() => _emailApiError = null);
-              },
-              decoration: const InputDecoration(
-                label: LabelObrigatorio('Email'),
-                prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
-              ),
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Informe o email';
-                final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                if (!regex.hasMatch(v.trim())) return 'Email inválido (ex: nome@dominio.com)';
-                if (_emailApiError != null) return _emailApiError;
-                return null;
-              },
-            ),
+            _buildCampoEmail(),
             const SizedBox(height: 20),
-            TextFormField(
-              controller: _telefoneCtrl,
-              style: const TextStyle(color: kTextPrimary),
-              cursorColor: kPrimary,
-              keyboardType: TextInputType.number,
-              inputFormatters: [TelefoneInputFormatter()],
-              decoration: const InputDecoration(
-                labelText: 'Telefone',
-                hintText: '(XX) XXXXX-XXXX',
-                prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
-              ),
-              onChanged: (_) {
-                if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
-              },
-              validator: (v) {
-                final digits = somenteDigitos(v);
-                if (digits.isEmpty) return _telefoneApiError;
-                if (digits.length < 10 || digits.length > 11) return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
-                if (digits[0] == '0') return 'DDD inválido (não pode começar com 0)';
-                if (_telefoneApiError != null) return _telefoneApiError;
-                return null;
-              },
-            ),
+            _buildCampoTelefone(),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _salvando ? null : _salvar,
@@ -370,6 +290,102 @@ class _MeusDadosFormState extends State<_MeusDadosForm> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCampoNome() {
+    return TextFormField(
+      controller: _nomeCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ ]'))],
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Nome'),
+        prefixIcon: Icon(Icons.person_outline, color: kTextSecondary, size: 20),
+      ),
+      onChanged: (_) {
+        if (_nomeApiError != null) setState(() => _nomeApiError = null);
+      },
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Informe o nome';
+        if (!RegExp(r'^[a-zA-ZÀ-ÿ ]+$').hasMatch(v)) return 'Nome deve conter apenas letras';
+        if (_nomeApiError != null) return _nomeApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoCpf() {
+    return TextFormField(
+      controller: _cpfCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.number,
+      inputFormatters: [CpfInputFormatter()],
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('CPF'),
+        hintText: 'XXX.XXX.XXX-XX',
+        prefixIcon: Icon(Icons.badge_outlined, color: kTextSecondary, size: 20),
+      ),
+      onChanged: (_) {
+        if (_cpfApiError != null) setState(() => _cpfApiError = null);
+      },
+      validator: (v) {
+        final digits = somenteDigitos(v);
+        if (digits.isEmpty) return 'Informe o CPF';
+        if (!cpfValido(digits)) return 'CPF inválido';
+        if (_cpfApiError != null) return _cpfApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoEmail() {
+    return TextFormField(
+      controller: _emailCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.emailAddress,
+      onChanged: (_) {
+        if (_emailApiError != null) setState(() => _emailApiError = null);
+      },
+      decoration: const InputDecoration(
+        label: LabelObrigatorio('Email'),
+        prefixIcon: Icon(Icons.email_outlined, color: kTextSecondary, size: 20),
+      ),
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Informe o email';
+        final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+        if (!regex.hasMatch(v.trim())) return 'Email inválido (ex: nome@dominio.com)';
+        if (_emailApiError != null) return _emailApiError;
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCampoTelefone() {
+    return TextFormField(
+      controller: _telefoneCtrl,
+      style: const TextStyle(color: kTextPrimary),
+      cursorColor: kPrimary,
+      keyboardType: TextInputType.number,
+      inputFormatters: [TelefoneInputFormatter()],
+      decoration: const InputDecoration(
+        labelText: 'Telefone',
+        hintText: '(XX) XXXXX-XXXX',
+        prefixIcon: Icon(Icons.phone_outlined, color: kTextSecondary, size: 20),
+      ),
+      onChanged: (_) {
+        if (_telefoneApiError != null) setState(() => _telefoneApiError = null);
+      },
+      validator: (v) {
+        final digits = somenteDigitos(v);
+        if (digits.isEmpty) return _telefoneApiError;
+        if (digits.length < 10 || digits.length > 11) return 'Telefone deve ter 10 ou 11 dígitos (com DDD)';
+        if (digits[0] == '0') return 'DDD inválido (não pode começar com 0)';
+        if (_telefoneApiError != null) return _telefoneApiError;
+        return null;
+      },
     );
   }
 }
