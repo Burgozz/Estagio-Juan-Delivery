@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.EMAIL_JA_CADASTRADO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
+
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
@@ -29,7 +32,7 @@ public class UsuarioService {
 
     public Usuario buscarPorId(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+            .orElseThrow(() -> new RuntimeException(USUARIO_NAO_ENCONTRADO));
     }
 
     public Usuario criar(UsuarioDTO dto) {
@@ -37,7 +40,7 @@ public class UsuarioService {
         if (existente.isPresent()) {
             Usuario usuario = existente.get();
             if (usuario.isAtivo()) {
-                throw new IllegalArgumentException("Email já cadastrado");
+                throw new IllegalArgumentException(EMAIL_JA_CADASTRADO);
             }
             usuario.setNome(dto.getNome());
             usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
@@ -64,7 +67,7 @@ public class UsuarioService {
         Usuario usuario = buscarPorId(id);
     repository.findByEmail(dto.getEmail())
         .filter(u -> !u.getId().equals(id))
-        .ifPresent(u -> { throw new IllegalArgumentException("Email já cadastrado"); });
+        .ifPresent(u -> { throw new IllegalArgumentException(EMAIL_JA_CADASTRADO); });
     usuario.setNome(dto.getNome());
     usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
     usuario.setEmail(dto.getEmail());

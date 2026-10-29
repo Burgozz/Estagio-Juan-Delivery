@@ -24,6 +24,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.NOME_TAMANHO;
+
 @Entity
 @Table(name = "usuarios")
 @Data
@@ -37,7 +39,7 @@ public class Usuario {
     private Long id;
 
     @NotBlank
-    @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
+    @Size(min = 2, max = 100, message = NOME_TAMANHO)
     private String nome;
 
     @Email

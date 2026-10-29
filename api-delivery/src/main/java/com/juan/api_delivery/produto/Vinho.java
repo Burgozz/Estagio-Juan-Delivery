@@ -16,6 +16,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.SAFRA_INVALIDA;
+
 @Entity
 @DiscriminatorValue("VINHO")
 @Data
@@ -32,8 +34,8 @@ public class Vinho extends Produto {
     @NotBlank
     private String paisOrigem;
 
-    @Min(value = 1800, message = "Safra inválida")
-    @Max(value = 2025, message = "Safra inválida")
+    @Min(value = 1800, message = SAFRA_INVALIDA)
+    @Max(value = 2025, message = SAFRA_INVALIDA)
     private int safra;
 
     @DecimalMin(value = "0.0", message = "Teor alcoólico não pode ser negativo")

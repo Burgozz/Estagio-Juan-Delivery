@@ -1,5 +1,6 @@
 package com.juan.api_delivery.shared.config;
 
+import com.juan.api_delivery.shared.validation.CpfValidator;
 import com.juan.api_delivery.usuario.PerfilUsuario;
 import com.juan.api_delivery.usuario.Usuario;
 import com.juan.api_delivery.usuario.UsuarioRepository;
@@ -18,6 +19,9 @@ import java.time.LocalDate;
 public class DataInitializer implements CommandLineRunner {
 
     private static final String EMAIL_ADMIN = "admin@juan.com";
+    private static final String NOME_ADMIN = "Admin";
+    private static final String SENHA_ADMIN = "admin";
+    private static final String TELEFONE_ADMIN = "00000000000";
 
     private final UsuarioRepository repository;
 
@@ -27,11 +31,11 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
         Usuario admin = Usuario.builder()
-            .nome("Admin")
+            .nome(NOME_ADMIN)
             .email(EMAIL_ADMIN)
-            .senha("admin")
-            .cpf("00000000000")
-            .telefone("00000000000")
+            .senha(SENHA_ADMIN)
+            .cpf(CpfValidator.CPF_CORINGA)
+            .telefone(TELEFONE_ADMIN)
             .perfil(PerfilUsuario.ADMIN)
             .ativo(true)
             .dataCadastro(LocalDate.now())

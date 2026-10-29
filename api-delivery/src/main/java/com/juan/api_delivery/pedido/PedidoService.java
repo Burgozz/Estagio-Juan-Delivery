@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_NAO_ENCONTRADO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
+
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
@@ -27,12 +30,12 @@ public class PedidoService {
 
     public Pedido buscarPorId(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException(PEDIDO_NAO_ENCONTRADO));
     }
 
     public Pedido criar(PedidoDTO dto) {
         Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-            .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException(USUARIO_NAO_ENCONTRADO));
         Pedido pedido = Pedido.builder()
             .usuario(usuario)
             .status(StatusPedido.PENDENTE)

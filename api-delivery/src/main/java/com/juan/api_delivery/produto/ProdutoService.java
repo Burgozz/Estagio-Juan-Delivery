@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.PRODUTO_NAO_ENCONTRADO;
+
 @Service
 @RequiredArgsConstructor
 public class ProdutoService {
@@ -32,7 +34,7 @@ public class ProdutoService {
 
     public Produto buscarPorId(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+            .orElseThrow(() -> new RuntimeException(PRODUTO_NAO_ENCONTRADO));
     }
 
     /**

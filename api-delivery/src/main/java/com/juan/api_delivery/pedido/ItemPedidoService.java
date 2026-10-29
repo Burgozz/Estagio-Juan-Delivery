@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_NAO_ENCONTRADO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.PRODUTO_NAO_ENCONTRADO;
+
 @Service
 @RequiredArgsConstructor
 public class ItemPedidoService {
@@ -22,9 +25,9 @@ public class ItemPedidoService {
 
     public ItemPedido adicionar(Long pedidoId, ItemPedidoDTO dto) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
-            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException(PEDIDO_NAO_ENCONTRADO));
         Produto produto = produtoRepository.findById(dto.getProdutoId())
-            .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException(PRODUTO_NAO_ENCONTRADO));
         ItemPedido item = ItemPedido.builder()
             .pedido(pedido)
             .produto(produto)

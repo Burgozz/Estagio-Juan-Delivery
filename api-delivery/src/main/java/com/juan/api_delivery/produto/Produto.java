@@ -23,6 +23,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.ESTOQUE_NEGATIVO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.NOME_TAMANHO;
+
 /**
  * Classe base do catálogo. Não é instanciável diretamente: todo produto
  * persistido é um {@link Vinho} ou um {@link Acessorio}, discriminados pela
@@ -44,7 +47,7 @@ public abstract class Produto {
     private Long id;
 
     @NotBlank
-    @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
+    @Size(min = 2, max = 100, message = NOME_TAMANHO)
     private String nome;
 
     @NotNull
@@ -56,7 +59,7 @@ public abstract class Produto {
 
     private String imagemUrl;
 
-    @Min(value = 0, message = "Estoque não pode ser negativo")
+    @Min(value = 0, message = ESTOQUE_NEGATIVO)
     private Integer estoque;
 
     @Builder.Default

@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.ESTOQUE_NEGATIVO;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,7 +47,7 @@ public class ProdutoDTO {
     private String material;
 
     @NotNull(message = "Informe o estoque")
-    @Min(value = 0, message = "Estoque não pode ser negativo")
+    @Min(value = 0, message = ESTOQUE_NEGATIVO)
     private Integer estoque;
 
     // safra e teorAlcool são campos wrapper aqui (compartilhados com o DTO de

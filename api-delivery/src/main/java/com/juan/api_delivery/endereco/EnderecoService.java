@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
+
 @Service
 @RequiredArgsConstructor
 public class EnderecoService {
@@ -42,6 +44,6 @@ public class EnderecoService {
 
     private Usuario buscarUsuario(Long usuarioId) {
         return usuarioRepository.findById(usuarioId)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+            .orElseThrow(() -> new RuntimeException(USUARIO_NAO_ENCONTRADO));
     }
 }
