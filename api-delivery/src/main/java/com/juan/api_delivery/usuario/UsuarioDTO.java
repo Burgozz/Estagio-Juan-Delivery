@@ -5,10 +5,13 @@ import com.juan.api_delivery.shared.validation.EmailDominioValido;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static com.juan.api_delivery.shared.exception.MensagensErro.SENHA_TAMANHO;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +33,7 @@ public class UsuarioDTO {
     private String email;
 
     @NotBlank
+    @Size(min = 6, message = SENHA_TAMANHO)
     private String senha;
 
     @Pattern(

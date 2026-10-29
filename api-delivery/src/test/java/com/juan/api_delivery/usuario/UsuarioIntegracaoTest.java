@@ -272,8 +272,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", corpo).andExpect(status().isCreated());
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.senha não tem @Size(min = 6). Mesmo problema do
-        // nome: a regra só existe na entidade e o erro chega fora do padrão.
         @Test
         void senhaComMenosDe6Retorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = usuario("senha5@teste.com", "11144477735");
@@ -283,9 +281,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erros", hasItem("Senha deve ter no mínimo 6 caracteres")));
         }
 
-        // BUG ENCONTRADO: na edição a validação da entidade só roda no commit, e o
-        // erro vira {"erro": "Could not commit JPA transaction"} (ou similar),
-        // sem dizer qual campo está errado.
         @Test
         void edicaoComSenhaCurtaRetorna400NoFormatoErros() throws Exception {
             JsonNode criado = corpoDe(postJson("/usuarios", usuario("edita@teste.com", "11144477735")));
