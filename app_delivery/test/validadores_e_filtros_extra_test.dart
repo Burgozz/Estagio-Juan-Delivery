@@ -9,8 +9,8 @@ import 'package:front_delivery/filters/texto_busca.dart';
 import 'package:front_delivery/filters/usuario_filtro.dart';
 import 'package:front_delivery/models/produto.dart';
 import 'package:front_delivery/models/usuario.dart';
-import 'package:front_delivery/utils/cpf_validator.dart';
-import 'package:front_delivery/utils/input_formatters.dart';
+import 'package:front_delivery/core/utils/cpf_validator.dart';
+import 'package:front_delivery/core/utils/input_formatters.dart';
 import 'package:front_delivery/widgets/pais_autocomplete_field.dart';
 
 List<int?> _ids(List list) => list.map((e) => e.id as int?).toList();

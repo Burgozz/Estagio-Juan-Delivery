@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
-import '../utils/input_formatters.dart';
-import '../utils/cpf_validator.dart';
-import '../widgets/label_obrigatorio.dart';
+import '../core/utils/input_formatters.dart';
+import '../core/utils/cpf_validator.dart';
+import '../core/widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kTextPrimary = Color(0xFF212121);

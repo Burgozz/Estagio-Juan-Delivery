@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:front_delivery/utils/harmonizacao_validator.dart';
+import 'package:front_delivery/core/utils/harmonizacao_validator.dart';
 
 /// Simula a digitação de [entrada], caractere a caractere, no fim do campo.
 String _digitar(String entrada) {

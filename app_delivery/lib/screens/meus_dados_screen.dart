@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
-import '../utils/input_formatters.dart';
-import '../utils/cpf_validator.dart';
-import '../utils/sessao_usuario.dart';
-import '../widgets/label_obrigatorio.dart';
+import '../core/utils/input_formatters.dart';
+import '../core/utils/cpf_validator.dart';
+import '../core/session/sessao_usuario.dart';
+import '../core/widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);

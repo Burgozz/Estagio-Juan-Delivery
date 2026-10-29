@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
-import '../utils/auth_theme.dart';
-import '../utils/input_formatters.dart';
-import '../utils/cpf_validator.dart';
+import '../core/theme/auth_theme.dart';
+import '../core/utils/input_formatters.dart';
+import '../core/utils/cpf_validator.dart';
 import 'login_screen.dart';
 
 class CadastroScreen extends StatefulWidget {

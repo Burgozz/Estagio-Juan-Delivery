@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/carrinho_controller.dart';
 import '../services/pedido_service.dart';
-import '../utils/sessao_usuario.dart';
+import '../core/session/sessao_usuario.dart';
 import 'catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import 'confirmacao_pedido_screen.dart';
 

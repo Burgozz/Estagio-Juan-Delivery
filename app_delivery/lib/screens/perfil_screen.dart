@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../utils/sessao_usuario.dart';
+import '../core/session/sessao_usuario.dart';
 import 'login_screen.dart';
 import 'meus_dados_screen.dart';
 import 'endereco_screen.dart';

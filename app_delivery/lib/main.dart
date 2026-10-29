@@ -9,7 +9,7 @@ import 'screens/inicio_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/pedidos_screen.dart';
 import 'screens/perfil_screen.dart';
-import 'utils/sessao_usuario.dart';
+import 'core/session/sessao_usuario.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);

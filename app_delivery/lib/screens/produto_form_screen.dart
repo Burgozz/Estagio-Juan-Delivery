@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
-import '../utils/harmonizacao_validator.dart';
+import '../core/utils/harmonizacao_validator.dart';
 import '../widgets/pais_autocomplete_field.dart';
-import '../widgets/label_obrigatorio.dart';
+import '../core/widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kTextPrimary = Color(0xFF212121);

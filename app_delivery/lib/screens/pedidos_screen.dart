@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/pedido.dart';
 import '../services/pedido_service.dart';
-import '../utils/sessao_usuario.dart';
+import '../core/session/sessao_usuario.dart';
 import 'catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import 'detalhes_pedido_screen.dart';
 

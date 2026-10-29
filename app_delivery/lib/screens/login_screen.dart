@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../services/auth_service.dart';
-import '../utils/auth_theme.dart';
-import '../utils/sessao_usuario.dart';
+import '../core/theme/auth_theme.dart';
+import '../core/session/sessao_usuario.dart';
 import 'cadastro_screen.dart';
 
 class LoginScreen extends StatefulWidget {

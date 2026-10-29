@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:front_delivery/utils/input_formatters.dart';
+import 'package:front_delivery/core/utils/input_formatters.dart';
 
 TextEditingValue _valor(String texto) =>
     TextEditingValue(text: texto, selection: TextSelection.collapsed(offset: texto.length));

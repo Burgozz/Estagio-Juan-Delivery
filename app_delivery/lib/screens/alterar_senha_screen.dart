@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../services/usuario_service.dart';
-import '../utils/sessao_usuario.dart';
-import '../widgets/label_obrigatorio.dart';
+import '../core/session/sessao_usuario.dart';
+import '../core/widgets/label_obrigatorio.dart';
 
 const kPrimary = Color(0xFF3C0731);
 const kBackground = Color(0xFFFAFAFA);

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:front_delivery/utils/cpf_validator.dart';
+import 'package:front_delivery/core/utils/cpf_validator.dart';
 
 void main() {
   group('cpfValido', () {
