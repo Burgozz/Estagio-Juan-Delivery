@@ -180,8 +180,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erro").value("Email já cadastrado"));
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.email não tem @NotBlank, então é possível
-        // criar usuário sem e-mail (e ele nunca conseguirá fazer login).
         @Test
         void emailAusenteRetorna400() throws Exception {
             Map<String, Object> corpo = usuario(null, "11144477735");
@@ -251,10 +249,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", corpo).andExpect(status().isCreated());
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.nome não tem @Size(min = 2, max = 100). A regra
-        // só existe na entidade Usuario, então o erro sai como {"erro": "<texto técnico
-        // do Hibernate Validator>"} em vez de {"erros": ["Nome deve ter entre 2 e 100
-        // caracteres"]}.
         @ParameterizedTest
         @ValueSource(ints = {1, 101})
         void nomeForaDoLimiteRetorna400NoFormatoErros(int tamanho) throws Exception {
