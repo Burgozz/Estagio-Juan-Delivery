@@ -135,8 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: 'Senha',
                       icon: Icons.lock_outline,
                     ),
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Informe a senha' : null,
+                    validator: (v) => v == null || v.isEmpty ? 'Informe a senha' : null,
                   ),
                   const SizedBox(height: 32),
                   SizedBox(

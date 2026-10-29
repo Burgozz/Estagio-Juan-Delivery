@@ -115,8 +115,7 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
                           children: [
                             Text(
                               p.nome,
-                              style: const TextStyle(
-                                  color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 20),
+                              style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 20),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -182,18 +181,14 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
 
   List<Widget> _camposVinho(Produto p) {
     return [
-      const Text('Detalhes do vinho',
-          style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+      const Text('Detalhes do vinho', style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
       const SizedBox(height: 10),
       _InfoLinha(icone: Icons.category_outlined, label: 'Categoria', valor: labelCategoria(p.categoria)),
       _InfoLinha(
           icone: Icons.flag_outlined,
           label: 'País de Origem da Uva',
           valor: (p.paisOrigem != null && p.paisOrigem!.isNotEmpty) ? p.paisOrigem! : '-'),
-      _InfoLinha(
-          icone: Icons.calendar_today_outlined,
-          label: 'Safra',
-          valor: p.safra?.toString() ?? '-'),
+      _InfoLinha(icone: Icons.calendar_today_outlined, label: 'Safra', valor: p.safra?.toString() ?? '-'),
       _InfoLinha(
           icone: Icons.opacity_outlined,
           label: 'Teor alcoólico',
@@ -244,8 +239,7 @@ class _InfoLinha extends StatelessWidget {
           const SizedBox(width: 10),
           Text('$label: ', style: const TextStyle(color: kTextSecondary, fontSize: 13)),
           Expanded(
-            child: Text(valor,
-                style: const TextStyle(color: kTextPrimary, fontSize: 13, fontWeight: FontWeight.w500)),
+            child: Text(valor, style: const TextStyle(color: kTextPrimary, fontSize: 13, fontWeight: FontWeight.w500)),
           ),
         ],
       ),

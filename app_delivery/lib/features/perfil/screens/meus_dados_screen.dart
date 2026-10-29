@@ -118,7 +118,9 @@ class _MeusDadosScreenState extends State<MeusDadosScreen> {
         _DadoCard(
           icone: Icons.phone_outlined,
           label: 'Telefone',
-          valor: (usuario.telefone == null || usuario.telefone!.isEmpty) ? 'Não informado' : formatarTelefone(usuario.telefone),
+          valor: (usuario.telefone == null || usuario.telefone!.isEmpty)
+              ? 'Não informado'
+              : formatarTelefone(usuario.telefone),
         ),
         const SizedBox(height: 12),
         ElevatedButton(

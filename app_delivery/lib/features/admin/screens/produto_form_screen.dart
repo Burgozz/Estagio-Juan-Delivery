@@ -203,9 +203,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         ButtonSegment(value: 'ACESSORIO', label: Text('Acessório'), icon: Icon(Icons.local_mall_outlined)),
       ],
       selected: {_tipo},
-      onSelectionChanged: isEditing
-          ? null
-          : (selecao) => setState(() => _tipo = selecao.first),
+      onSelectionChanged: isEditing ? null : (selecao) => setState(() => _tipo = selecao.first),
       style: SegmentedButton.styleFrom(
         selectedBackgroundColor: kPrimary,
         selectedForegroundColor: Colors.white,
@@ -294,9 +292,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         ),
         dropdownColor: Colors.white,
         style: const TextStyle(color: kTextPrimary),
-        items: _categorias
-            .map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!)))
-            .toList(),
+        items: _categorias.map((c) => DropdownMenuItem(value: c['value'], child: Text(c['label']!))).toList(),
         onChanged: (val) => setState(() {
           _categoriaSelecionada = val;
           _categoriaApiError = null;

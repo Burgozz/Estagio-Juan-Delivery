@@ -55,8 +55,7 @@ Future<void> _salvar(WidgetTester tester, [String botao = 'CADASTRAR']) async {
 
 void main() {
   group('Vinho', () {
-    testWidgets('digitar "Arg" e tocar em "Argentina" seleciona o país e o formulário valida e envia',
-        (tester) async {
+    testWidgets('digitar "Arg" e tocar em "Argentina" seleciona o país e o formulário valida e envia', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
         await _abrir(tester);
@@ -68,8 +67,7 @@ void main() {
         FocusManager.instance.primaryFocus?.unfocus();
         await tester.pumpAndSettle();
         await _salvar(tester);
-        expect(erroNoCampo('País de Origem da Uva *', 'País inválido. Selecione um país da lista.'),
-            findsOneWidget);
+        expect(erroNoCampo('País de Origem da Uva *', 'País inválido. Selecione um país da lista.'), findsOneWidget);
         expect(api.requisicoes, isEmpty);
 
         // Seleciona pelo toque na lista.
@@ -154,9 +152,16 @@ void main() {
     testWidgets('estoque 0 é permitido na edição', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 3}, 200));
       final vinho = Produto(
-        id: 3, nome: 'Malbec', preco: 89.9, estoque: 4, tipo: 'VINHO',
-        categoria: 'VINHO_TINTO', paisOrigem: 'Argentina', safra: 2020, teorAlcool: 13.5,
-        harmonizacao: 'Carnes vermelhas');
+          id: 3,
+          nome: 'Malbec',
+          preco: 89.9,
+          estoque: 4,
+          tipo: 'VINHO',
+          categoria: 'VINHO_TINTO',
+          paisOrigem: 'Argentina',
+          safra: 2020,
+          teorAlcool: 13.5,
+          harmonizacao: 'Carnes vermelhas');
       await api.executar(() async {
         await _abrir(tester, produto: vinho);
         await tester.enterText(campo('Estoque (unidades) *'), '0');
@@ -168,7 +173,9 @@ void main() {
     });
 
     testWidgets('erro de safra vindo da API aparece embaixo do campo Safra', (tester) async {
-      final api = ApiFalsa((_) => respostaJson({'erros': ['Safra é obrigatória para vinhos']}, 400));
+      final api = ApiFalsa((_) => respostaJson({
+            'erros': ['Safra é obrigatória para vinhos']
+          }, 400));
       await api.executar(() async {
         await _abrir(tester);
         await _preencherVinho(tester, safra: '');

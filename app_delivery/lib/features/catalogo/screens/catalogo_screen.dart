@@ -15,8 +15,7 @@ const Map<String, String> _categoriaLabels = {
   'VINHO_IMPORTADO': 'Importado',
 };
 
-String labelCategoria(String? categoria) =>
-    _categoriaLabels[categoria] ?? categoria ?? '-';
+String labelCategoria(String? categoria) => _categoriaLabels[categoria] ?? categoria ?? '-';
 
 String labelTipo(String tipo) => tipo == 'ACESSORIO' ? 'Acessório' : 'Vinho';
 
@@ -71,8 +70,7 @@ const Map<String, Color> _categoriaCores = {
 };
 const _kCorAcessorio = Color(0xFF4A4A4A);
 
-Color _corBadge(Produto p) =>
-    p.isAcessorio ? _kCorAcessorio : (_categoriaCores[p.categoria] ?? kTextSecondary);
+Color _corBadge(Produto p) => p.isAcessorio ? _kCorAcessorio : (_categoriaCores[p.categoria] ?? kTextSecondary);
 
 String _labelBadge(Produto p) => p.isAcessorio ? 'Acessório' : labelCategoria(p.categoria);
 
@@ -207,9 +205,7 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
     } else if (chave == _kChaveAcessorios) {
       lista = _todosProdutos.where((p) => p.isAcessorio).toList();
     } else if (chave == _kChaveHarmonizacoes) {
-      lista = _todosProdutos
-          .where((p) => p.isVinho && (p.harmonizacao?.trim().isNotEmpty ?? false))
-          .toList();
+      lista = _todosProdutos.where((p) => p.isVinho && (p.harmonizacao?.trim().isNotEmpty ?? false)).toList();
     } else {
       lista = _resultadosCategoria ?? [];
     }
@@ -220,8 +216,7 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
     return lista.where((p) => p.nome.toLowerCase().contains(_termoBusca)).toList();
   }
 
-  bool get _modoResultados =>
-      _termoBusca.isNotEmpty || _categoriaChave != null || _tipoFiltro != null;
+  bool get _modoResultados => _termoBusca.isNotEmpty || _categoriaChave != null || _tipoFiltro != null;
 
   @override
   Widget build(BuildContext context) {
@@ -428,8 +423,7 @@ class _ProdutoCard extends StatelessWidget {
                   children: [
                     Text(
                       produto.nome,
-                      style: const TextStyle(
-                          color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 15),
+                      style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 15),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -447,8 +441,7 @@ class _ProdutoCard extends StatelessWidget {
                           ),
                           child: Text(
                             _labelBadge(produto),
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],

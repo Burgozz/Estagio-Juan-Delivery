@@ -101,7 +101,8 @@ class _AlterarSenhaScreenState extends State<AlterarSenhaScreen> {
                   label: LabelObrigatorio('Senha atual'),
                   prefixIcon: const Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                   suffixIcon: IconButton(
-                    icon: Icon(_mostrarAtual ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
+                    icon:
+                        Icon(_mostrarAtual ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
                     onPressed: () => setState(() => _mostrarAtual = !_mostrarAtual),
                   ),
                 ),
@@ -137,7 +138,8 @@ class _AlterarSenhaScreenState extends State<AlterarSenhaScreen> {
                   label: LabelObrigatorio('Confirmar nova senha'),
                   prefixIcon: const Icon(Icons.lock_outline, color: kTextSecondary, size: 20),
                   suffixIcon: IconButton(
-                    icon: Icon(_mostrarConfirmar ? Icons.visibility_off : Icons.visibility, color: kTextSecondary, size: 20),
+                    icon: Icon(_mostrarConfirmar ? Icons.visibility_off : Icons.visibility,
+                        color: kTextSecondary, size: 20),
                     onPressed: () => setState(() => _mostrarConfirmar = !_mostrarConfirmar),
                   ),
                 ),

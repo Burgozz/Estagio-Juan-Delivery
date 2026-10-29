@@ -22,8 +22,7 @@ TextEditingValue _backspace(TextInputFormatter f, TextEditingValue atual) {
 }
 
 /// Simula colar [colado] em um campo vazio.
-TextEditingValue _colar(TextInputFormatter f, String colado) =>
-    f.formatEditUpdate(_valor(''), _valor(colado));
+TextEditingValue _colar(TextInputFormatter f, String colado) => f.formatEditUpdate(_valor(''), _valor(colado));
 
 void main() {
   group('TelefoneInputFormatter', () {

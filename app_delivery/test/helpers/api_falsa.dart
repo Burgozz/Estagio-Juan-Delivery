@@ -20,14 +20,11 @@ class ApiFalsa {
     return responder(req);
   });
 
-  Future<T> executar<T>(Future<T> Function() corpo) =>
-      http.runWithClient(corpo, () => _client);
+  Future<T> executar<T>(Future<T> Function() corpo) => http.runWithClient(corpo, () => _client);
 
-  Iterable<http.Request> doMetodo(String metodo) =>
-      requisicoes.where((r) => r.method == metodo);
+  Iterable<http.Request> doMetodo(String metodo) => requisicoes.where((r) => r.method == metodo);
 
-  Map<String, dynamic> corpoJson(http.Request req) =>
-      jsonDecode(req.body) as Map<String, dynamic>;
+  Map<String, dynamic> corpoJson(http.Request req) => jsonDecode(req.body) as Map<String, dynamic>;
 }
 
 /// Resposta JSON em UTF-8 (as mensagens do backend têm acentos).
@@ -48,8 +45,7 @@ void usarTelaAlta(WidgetTester tester) {
 Finder campo(String label) => find.widgetWithText(TextFormField, label);
 
 /// Texto exibido como erro inline DENTRO do campo indicado (e não num SnackBar).
-Finder erroNoCampo(String label, String mensagem) =>
-    find.descendant(of: campo(label), matching: find.text(mensagem));
+Finder erroNoCampo(String label, String mensagem) => find.descendant(of: campo(label), matching: find.text(mensagem));
 
 /// Abre [tela] por cima de uma rota inicial, para que `Navigator.pop` funcione.
 Widget appComRota(Widget tela) => MaterialApp(

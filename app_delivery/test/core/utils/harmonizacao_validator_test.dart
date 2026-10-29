@@ -52,8 +52,7 @@ void main() {
 
   group('normalizarHarmonizacao', () {
     test('aplica trim e colapsa espaços repetidos', () {
-      expect(normalizarHarmonizacao('  Carnes    vermelhas \t e  queijos  '),
-          'Carnes vermelhas e queijos');
+      expect(normalizarHarmonizacao('  Carnes    vermelhas \t e  queijos  '), 'Carnes vermelhas e queijos');
     });
   });
 

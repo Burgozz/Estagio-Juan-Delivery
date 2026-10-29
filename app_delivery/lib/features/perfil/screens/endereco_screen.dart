@@ -99,7 +99,8 @@ class _EnderecoScreenState extends State<EnderecoScreen> {
           }
           if (snapshot.hasError) {
             final mensagem = snapshot.error.toString().replaceFirst('Exception: ', '');
-            return Center(child: Text(mensagem, style: const TextStyle(color: kTextPrimary), textAlign: TextAlign.center));
+            return Center(
+                child: Text(mensagem, style: const TextStyle(color: kTextPrimary), textAlign: TextAlign.center));
           }
           final enderecos = snapshot.data!;
           if (enderecos.isEmpty) {
@@ -144,7 +145,8 @@ class _EnderecoScreenState extends State<EnderecoScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(e.bairro, style: const TextStyle(color: kTextSecondary, fontSize: 13)),
-                          Text('${e.cidade} - ${e.estado}', style: const TextStyle(color: kTextSecondary, fontSize: 13)),
+                          Text('${e.cidade} - ${e.estado}',
+                              style: const TextStyle(color: kTextSecondary, fontSize: 13)),
                         ],
                       ),
                     ),

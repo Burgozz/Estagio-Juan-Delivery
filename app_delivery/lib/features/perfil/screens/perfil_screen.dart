@@ -321,7 +321,8 @@ class _PerfilItem extends StatelessWidget {
                     children: [
                       Text(
                         titulo,
-                        style: TextStyle(color: cor == kPerigo ? kPerigo : kTextPrimary, fontWeight: FontWeight.w700, fontSize: 15),
+                        style: TextStyle(
+                            color: cor == kPerigo ? kPerigo : kTextPrimary, fontWeight: FontWeight.w700, fontSize: 15),
                       ),
                       if (subtitulo != null) ...[
                         const SizedBox(height: 2),

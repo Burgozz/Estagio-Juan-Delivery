@@ -83,10 +83,7 @@ class _BarraBuscaFiltrosState extends State<BarraBuscaFiltros> {
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(color: Colors.black12),
                 boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 3)),
                 ],
               ),
               child: TextField(
@@ -153,8 +150,7 @@ class _BotaoFiltros extends StatelessWidget {
               offset: const Offset(6, -6),
               alignment: AlignmentDirectional.topEnd,
               child: Center(
-                child: Icon(Icons.tune,
-                    color: destacado ? Colors.white : kPrimary, size: 22),
+                child: Icon(Icons.tune, color: destacado ? Colors.white : kPrimary, size: 22),
               ),
             ),
           ),

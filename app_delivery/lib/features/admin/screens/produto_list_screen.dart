@@ -247,8 +247,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
         backgroundColor: kPrimary,
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () async {
-          await Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ProdutoFormScreen()));
+          await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProdutoFormScreen()));
           _carregar();
         },
       ),
@@ -286,8 +285,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
           children: [
             Icon(Icons.wine_bar_outlined, size: 64, color: kPrimary),
             SizedBox(height: 16),
-            Text('Nenhum produto cadastrado.',
-                style: TextStyle(color: kTextSecondary, fontSize: 16)),
+            Text('Nenhum produto cadastrado.', style: TextStyle(color: kTextSecondary, fontSize: 16)),
           ],
         ),
       );
@@ -302,9 +300,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
           onLimpar: _limparFiltros,
         ),
         Expanded(
-          child: filtrados.isEmpty
-              ? SemResultados(onLimpar: _limparFiltros)
-              : _buildLista(filtrados),
+          child: filtrados.isEmpty ? SemResultados(onLimpar: _limparFiltros) : _buildLista(filtrados),
         ),
       ],
     );
@@ -330,8 +326,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
             padding: EdgeInsets.only(top: 8, bottom: 12),
             child: Text(
               'Inativos',
-              style: TextStyle(
-                  color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
+              style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
           ...inativos.map((p) => _buildProdutoCard(p, inativo: true)),
@@ -359,16 +354,13 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
               size: 22,
             ),
           ),
-          title: Text(p.nome,
-              style: const TextStyle(
-                  color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 15)),
+          title: Text(p.nome, style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 15)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_labelCategoria(p.categoria),
-                    style: const TextStyle(color: kPrimary, fontSize: 12)),
+                Text(_labelCategoria(p.categoria), style: const TextStyle(color: kPrimary, fontSize: 12)),
                 Text(
                   'R\$ ${p.preco.toStringAsFixed(2)}  •  Estoque: ${p.estoque}',
                   style: const TextStyle(color: kTextSecondary, fontSize: 12),
@@ -382,8 +374,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
               IconButton(
                 icon: const Icon(Icons.edit_outlined, color: kPrimary, size: 20),
                 onPressed: () async {
-                  await Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => ProdutoFormScreen(produto: p)));
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => ProdutoFormScreen(produto: p)));
                   _carregar();
                 },
               ),
@@ -413,8 +404,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
             ),
             child: const Text(
               'Inativo',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11),
             ),
           ),
         ),

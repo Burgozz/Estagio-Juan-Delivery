@@ -10,24 +10,47 @@ import 'package:http/http.dart' as http;
 import '../../helpers/api_falsa.dart';
 
 Map<String, Object?> _usuario(int id, String nome, String email, {bool ativo = true, String perfil = 'CLIENTE'}) => {
-      'id': id, 'nome': nome, 'email': email, 'senha': '123456', 'cpf': '11144477735',
-      'telefone': '43999998888', 'dataCadastro': '2026-10-01', 'ativo': ativo, 'perfil': perfil,
+      'id': id,
+      'nome': nome,
+      'email': email,
+      'senha': '123456',
+      'cpf': '11144477735',
+      'telefone': '43999998888',
+      'dataCadastro': '2026-10-01',
+      'ativo': ativo,
+      'perfil': perfil,
     };
 
-Map<String, Object?> _vinho(int id, String nome, {bool ativo = true, int estoque = 10, String categoria = 'VINHO_TINTO'}) => {
-      'id': id, 'nome': nome, 'preco': 80.0, 'tipo': 'VINHO', 'estoque': estoque, 'ativo': ativo,
-      'categoria': categoria, 'paisOrigem': 'Chile', 'safra': 2020, 'teorAlcool': 13.0,
+Map<String, Object?> _vinho(int id, String nome,
+        {bool ativo = true, int estoque = 10, String categoria = 'VINHO_TINTO'}) =>
+    {
+      'id': id,
+      'nome': nome,
+      'preco': 80.0,
+      'tipo': 'VINHO',
+      'estoque': estoque,
+      'ativo': ativo,
+      'categoria': categoria,
+      'paisOrigem': 'Chile',
+      'safra': 2020,
+      'teorAlcool': 13.0,
       'harmonizacao': 'Carnes vermelhas',
     };
 
 Map<String, Object?> _acessorio(int id, String nome, {bool ativo = true, int estoque = 5}) => {
-      'id': id, 'nome': nome, 'preco': 40.0, 'tipo': 'ACESSORIO', 'estoque': estoque, 'ativo': ativo,
-      'tipoAcessorio': 'Taça', 'marca': 'Bohemia', 'material': 'Cristal',
+      'id': id,
+      'nome': nome,
+      'preco': 40.0,
+      'tipo': 'ACESSORIO',
+      'estoque': estoque,
+      'ativo': ativo,
+      'tipoAcessorio': 'Taça',
+      'marca': 'Bohemia',
+      'material': 'Cristal',
     };
 
 /// Responde GET /usuarios/admin e /produtos/admin com as listas dadas.
-ApiFalsa _api({List<Object?> usuarios = const [], List<Object?> produtos = const []}) =>
-    ApiFalsa((http.Request r) {
+ApiFalsa _api({List<Object?> usuarios = const [], List<Object?> produtos = const []}) => ApiFalsa((http.Request r) {
       if (r.url.path == '/usuarios/admin') return respostaJson(usuarios);
       if (r.url.path == '/produtos/admin') return respostaJson(produtos);
       return respostaJson({'erro': 'rota inesperada ${r.url.path}'}, 404);
@@ -115,8 +138,8 @@ void main() {
       });
       expect(api.doMetodo('DELETE').single.url.path, '/usuarios/1');
       expect(find.text('Inativos'), findsNWidgets(2));
-      expect(tester.getTopLeft(find.text('Ana Ativa')).dy,
-          greaterThan(tester.getTopLeft(find.text('Inativos').last).dy));
+      expect(
+          tester.getTopLeft(find.text('Ana Ativa')).dy, greaterThan(tester.getTopLeft(find.text('Inativos').last).dy));
     });
 
     testWidgets('painel de filtros: perfil Admin + badge de filtros ativos', (tester) async {
@@ -362,8 +385,7 @@ void main() {
         _vinho(2, 'Chardonnay', categoria: 'VINHO_BRANCO'),
         _acessorio(3, 'Taça'),
       ]);
-      bool selecionado(String label) =>
-          tester.widget<FiltroChip>(find.widgetWithText(FiltroChip, label)).selecionado;
+      bool selecionado(String label) => tester.widget<FiltroChip>(find.widgetWithText(FiltroChip, label)).selecionado;
 
       await api.executar(() async {
         await abrir(tester);

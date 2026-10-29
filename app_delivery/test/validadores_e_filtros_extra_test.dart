@@ -86,17 +86,32 @@ void main() {
   // -------------------------------------------------------------------
   group('UsuarioFiltro (casos extras)', () {
     Usuario u(int id, String nome,
-            {String cpf = '00000000000', String email = 'x@x.com', String? telefone,
-             Object? data, bool ativo = true, String? perfil = 'CLIENTE'}) =>
-        Usuario(id: id, nome: nome, cpf: cpf, email: email, senha: '', telefone: telefone,
-            dataCadastro: data, ativo: ativo, perfil: perfil);
+            {String cpf = '00000000000',
+            String email = 'x@x.com',
+            String? telefone,
+            Object? data,
+            bool ativo = true,
+            String? perfil = 'CLIENTE'}) =>
+        Usuario(
+            id: id,
+            nome: nome,
+            cpf: cpf,
+            email: email,
+            senha: '',
+            telefone: telefone,
+            dataCadastro: data,
+            ativo: ativo,
+            perfil: perfil);
 
     final agora = DateTime(2026, 10, 22);
     final usuarios = [
-      u(1, 'Conceição Araújo', cpf: '11144477735', email: 'conceicao@juan.com',
-          telefone: '4333334444', data: '2026-10-15'), // exatamente 7 dias atrás
-      u(2, 'Paulo', cpf: '52998224725', email: 'paulo@gmail.com', telefone: '43999998888',
-          data: '2026-10-14'), // 8 dias atrás
+      u(1, 'Conceição Araújo',
+          cpf: '11144477735',
+          email: 'conceicao@juan.com',
+          telefone: '4333334444',
+          data: '2026-10-15'), // exatamente 7 dias atrás
+      u(2, 'Paulo',
+          cpf: '52998224725', email: 'paulo@gmail.com', telefone: '43999998888', data: '2026-10-14'), // 8 dias atrás
       u(3, 'Admin', email: 'admin@juan.com', perfil: 'ADMIN', data: '2026-01-01'),
       u(4, 'Sem Perfil', email: 'semperfil@juan.com', perfil: null, data: null),
       u(5, 'Inês Inativa', email: 'ines@juan.com', ativo: false, data: '2025-12-31'),
@@ -124,8 +139,7 @@ void main() {
     });
 
     test('data de cadastro: limites de 7 dias, este ano e sem data', () {
-      List<int?> por(PeriodoCadastro p) =>
-          _ids(UsuarioFiltro(periodo: p).aplicar(usuarios, agora: agora));
+      List<int?> por(PeriodoCadastro p) => _ids(UsuarioFiltro(periodo: p).aplicar(usuarios, agora: agora));
       expect(por(PeriodoCadastro.ultimos7Dias), [1]); // 15/10 entra, 14/10 não
       expect(por(PeriodoCadastro.ultimos30Dias), [2, 1]);
       expect(por(PeriodoCadastro.esteAno), [3, 2, 1]); // 31/12/2025 fica de fora
@@ -134,14 +148,16 @@ void main() {
 
     test('ordenação por nome ignora acento', () {
       final r = const UsuarioFiltro(ordenacao: OrdenacaoUsuario.nomeAZ).aplicar(usuarios);
-      expect(r.map((e) => e.nome).toList(),
-          ['Admin', 'Conceição Araújo', 'Inês Inativa', 'Paulo', 'Sem Perfil']);
+      expect(r.map((e) => e.nome).toList(), ['Admin', 'Conceição Araújo', 'Inês Inativa', 'Paulo', 'Sem Perfil']);
     });
 
     test('painel conta perfil + período + ordenação e limpar mantém busca/status', () {
       const f = UsuarioFiltro(
-          busca: 'a', status: StatusFiltro.inativos, perfil: PerfilFiltro.cliente,
-          periodo: PeriodoCadastro.esteAno, ordenacao: OrdenacaoUsuario.nomeZA);
+          busca: 'a',
+          status: StatusFiltro.inativos,
+          perfil: PerfilFiltro.cliente,
+          periodo: PeriodoCadastro.esteAno,
+          ordenacao: OrdenacaoUsuario.nomeZA);
       expect(f.avancadosAtivos, 3);
       expect(f.temFiltroAtivo, isTrue);
       final l = f.limparAvancados();
@@ -152,10 +168,21 @@ void main() {
   // -------------------------------------------------------------------
   group('ProdutoFiltro (casos extras)', () {
     Produto p(int id, String nome,
-            {double preco = 50, int estoque = 10, bool ativo = true, String tipo = 'VINHO',
-             String? categoria, String? pais}) =>
-        Produto(id: id, nome: nome, preco: preco, estoque: estoque, ativo: ativo, tipo: tipo,
-            categoria: categoria, paisOrigem: pais);
+            {double preco = 50,
+            int estoque = 10,
+            bool ativo = true,
+            String tipo = 'VINHO',
+            String? categoria,
+            String? pais}) =>
+        Produto(
+            id: id,
+            nome: nome,
+            preco: preco,
+            estoque: estoque,
+            ativo: ativo,
+            tipo: tipo,
+            categoria: categoria,
+            paisOrigem: pais);
 
     final produtos = [
       p(1, 'Tinto Chileno', preco: 35.5, estoque: 0, ativo: false, categoria: 'VINHO_TINTO', pais: 'Chile'),
@@ -176,8 +203,7 @@ void main() {
     });
 
     test('categoria múltipla (3 categorias) com tipo Vinhos', () {
-      const f = ProdutoFiltro(
-          tipo: TipoFiltro.vinhos, categorias: {'VINHO_TINTO', 'VINHO_ROSE', 'VINHO_ESPUMANTE'});
+      const f = ProdutoFiltro(tipo: TipoFiltro.vinhos, categorias: {'VINHO_TINTO', 'VINHO_ROSE', 'VINHO_ESPUMANTE'});
       expect(_ids(f.aplicar(produtos)), [4, 3, 1]);
       expect(f.avancadosAtivos, 2);
     });
@@ -221,8 +247,11 @@ void main() {
 
     test('limpar mantém busca e status e zera o resto', () {
       final f = const ProdutoFiltro(
-              busca: 'x', status: StatusFiltro.ativos, tipo: TipoFiltro.vinhos,
-              estoque: EstoqueFiltro.baixo, ordenacao: OrdenacaoProduto.maiorPreco)
+              busca: 'x',
+              status: StatusFiltro.ativos,
+              tipo: TipoFiltro.vinhos,
+              estoque: EstoqueFiltro.baixo,
+              ordenacao: OrdenacaoProduto.maiorPreco)
           .comPreco(10, 20);
       expect(f.avancadosAtivos, 4);
       final l = f.limparAvancados();

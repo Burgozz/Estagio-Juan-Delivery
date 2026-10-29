@@ -32,8 +32,7 @@ class Pedido {
       status: json['status'] ?? 'PENDENTE',
       dataPedido: json['dataPedido'] != null ? DateTime.tryParse(json['dataPedido'].toString()) : null,
       valorTotal: (json['valorTotal'] as num?)?.toDouble() ?? 0.0,
-      enderecosUsuario:
-          enderecosJson?.map((e) => Endereco.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
+      enderecosUsuario: enderecosJson?.map((e) => Endereco.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
     );
   }
 }

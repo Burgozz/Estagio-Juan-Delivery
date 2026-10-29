@@ -71,16 +71,12 @@ void main() {
   group('UsuarioFiltro', () {
     final usuarios = [
       _usuario(1, 'José Antônio',
-          cpf: '11144477735', email: 'jose@juan.com', telefone: '11987654321',
-          dataCadastro: '2026-10-20'),
-      _usuario(2, 'Maria Silva',
-          cpf: '52998224725', email: 'maria@juan.com', dataCadastro: '2026-01-05'),
+          cpf: '11144477735', email: 'jose@juan.com', telefone: '11987654321', dataCadastro: '2026-10-20'),
+      _usuario(2, 'Maria Silva', cpf: '52998224725', email: 'maria@juan.com', dataCadastro: '2026-01-05'),
       _usuario(3, 'Ana Admin',
-          cpf: '00000000000', email: 'admin@juan.com', perfil: 'ADMIN',
-          dataCadastro: '2025-06-01'),
+          cpf: '00000000000', email: 'admin@juan.com', perfil: 'ADMIN', dataCadastro: '2025-06-01'),
       _usuario(4, 'Bruno Inativo',
-          cpf: '12345678909', email: 'bruno@juan.com', ativo: false,
-          dataCadastro: '2026-10-21'),
+          cpf: '12345678909', email: 'bruno@juan.com', ativo: false, dataCadastro: '2026-10-21'),
     ];
     final agora = DateTime(2026, 10, 22);
 
@@ -126,8 +122,7 @@ void main() {
     });
 
     test('períodos de cadastro', () {
-      List<int?> por(PeriodoCadastro p) =>
-          _ids(UsuarioFiltro(periodo: p).aplicar(usuarios, agora: agora));
+      List<int?> por(PeriodoCadastro p) => _ids(UsuarioFiltro(periodo: p).aplicar(usuarios, agora: agora));
       expect(por(PeriodoCadastro.ultimos7Dias), [4, 1]);
       expect(por(PeriodoCadastro.ultimos30Dias), [4, 1]);
       expect(por(PeriodoCadastro.esteAno), [4, 2, 1]);
@@ -164,17 +159,12 @@ void main() {
 
   group('ProdutoFiltro', () {
     final produtos = [
-      _produto(1, 'Vinho Tinto Português',
-          preco: 89.9, estoque: 12, categoria: 'VINHO_TINTO', paisOrigem: 'Portugal'),
+      _produto(1, 'Vinho Tinto Português', preco: 89.9, estoque: 12, categoria: 'VINHO_TINTO', paisOrigem: 'Portugal'),
       _produto(2, 'Rosé Provence',
-          preco: 120, estoque: 3, categoria: 'VINHO_ROSE', paisOrigem: 'França',
-          descricao: 'Leve e frutado'),
-      _produto(3, 'Saca-rolhas',
-          preco: 35, estoque: 0, ativo: false, tipo: 'ACESSORIO', marca: 'Tramontina'),
-      _produto(4, 'Espumante Brut',
-          preco: 60, estoque: 5, categoria: 'VINHO_ESPUMANTE', paisOrigem: 'Brasil'),
-      _produto(5, 'Taça de Cristal',
-          preco: 45, estoque: 20, tipo: 'ACESSORIO', marca: 'Bohemia'),
+          preco: 120, estoque: 3, categoria: 'VINHO_ROSE', paisOrigem: 'França', descricao: 'Leve e frutado'),
+      _produto(3, 'Saca-rolhas', preco: 35, estoque: 0, ativo: false, tipo: 'ACESSORIO', marca: 'Tramontina'),
+      _produto(4, 'Espumante Brut', preco: 60, estoque: 5, categoria: 'VINHO_ESPUMANTE', paisOrigem: 'Brasil'),
+      _produto(5, 'Taça de Cristal', preco: 45, estoque: 20, tipo: 'ACESSORIO', marca: 'Bohemia'),
     ];
 
     test('busca sem acento em nome, país, descrição e marca', () {

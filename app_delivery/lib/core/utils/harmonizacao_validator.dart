@@ -12,8 +12,7 @@ final _letra = RegExp(r"[a-zA-ZÀ-ÿ]");
 final harmonizacaoInputFormatter = FilteringTextInputFormatter.allow(_caracterPermitido);
 
 /// Aplica trim e troca espaços repetidos por um só.
-String normalizarHarmonizacao(String? valor) =>
-    (valor ?? '').trim().replaceAll(RegExp(r'\s+'), ' ');
+String normalizarHarmonizacao(String? valor) => (valor ?? '').trim().replaceAll(RegExp(r'\s+'), ' ');
 
 /// Validação da harmonização (obrigatória para vinhos). Retorna null se válida.
 String? validarHarmonizacao(String? valor) {

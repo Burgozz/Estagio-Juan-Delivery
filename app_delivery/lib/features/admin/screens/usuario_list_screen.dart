@@ -223,9 +223,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
           onLimpar: _limparFiltros,
         ),
         Expanded(
-          child: filtrados.isEmpty
-              ? SemResultados(onLimpar: _limparFiltros)
-              : _buildLista(filtrados),
+          child: filtrados.isEmpty ? SemResultados(onLimpar: _limparFiltros) : _buildLista(filtrados),
         ),
       ],
     );
@@ -251,8 +249,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
             padding: EdgeInsets.only(top: 8, bottom: 12),
             child: Text(
               'Inativos',
-              style: TextStyle(
-                  color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
+              style: TextStyle(color: kTextPrimary, fontWeight: FontWeight.w700, fontSize: 16),
             ),
           ),
           ...inativos.map((u) => _buildUsuarioCard(u, inativo: true)),
@@ -317,8 +314,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.delete_outline,
-                          color: Colors.red.shade300, size: 20),
+                      icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
                       onPressed: () => _deletar(u.id!, u.nome),
                     ),
                   ],
@@ -343,8 +339,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
             ),
             child: const Text(
               'Inativo',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11),
             ),
           ),
         ),

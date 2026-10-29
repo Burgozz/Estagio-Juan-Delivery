@@ -43,8 +43,7 @@ Future<T?> abrirPainelFiltros<T>({
                   padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
                   child: Text(
                     'Filtros',
-                    style: TextStyle(
-                        color: kPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: kPrimary, fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Flexible(
@@ -68,8 +67,7 @@ Future<T?> abrirPainelFiltros<T>({
                             foregroundColor: kPrimary,
                             side: const BorderSide(color: kPrimary),
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           child: const Text('Limpar'),
                         ),
@@ -112,8 +110,7 @@ class SecaoFiltro extends StatelessWidget {
             children: [
               Text(
                 titulo,
-                style: const TextStyle(
-                    color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+                style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14),
               ),
               const Spacer(),
               if (trailing != null) trailing!,
@@ -133,6 +130,5 @@ class DicaFiltro extends StatelessWidget {
   const DicaFiltro(this.texto, {super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      Text(texto, style: const TextStyle(color: kTextSecondary, fontSize: 12));
+  Widget build(BuildContext context) => Text(texto, style: const TextStyle(color: kTextSecondary, fontSize: 12));
 }

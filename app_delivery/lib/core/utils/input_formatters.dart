@@ -51,8 +51,7 @@ abstract class _MascaraNumericaFormatter extends TextInputFormatter {
   ) {
     var digitos = somenteDigitos(newValue.text);
 
-    final apagouSoSimbolo = newValue.text.length < oldValue.text.length &&
-        digitos == somenteDigitos(oldValue.text);
+    final apagouSoSimbolo = newValue.text.length < oldValue.text.length && digitos == somenteDigitos(oldValue.text);
     if (apagouSoSimbolo && digitos.isNotEmpty) {
       final cursor = newValue.selection.isValid
           ? newValue.selection.baseOffset.clamp(0, newValue.text.length)

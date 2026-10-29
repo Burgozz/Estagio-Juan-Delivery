@@ -137,8 +137,7 @@ class ProdutoFiltro {
         ordenacao != OrdenacaoProduto.maisRecentes,
       ].where((a) => a).length;
 
-  bool get temFiltroAtivo =>
-      busca.trim().isNotEmpty || status != StatusFiltro.todos || avancadosAtivos > 0;
+  bool get temFiltroAtivo => busca.trim().isNotEmpty || status != StatusFiltro.todos || avancadosAtivos > 0;
 
   List<Produto> aplicar(List<Produto> produtos) {
     final resultado = produtos
@@ -157,8 +156,7 @@ class ProdutoFiltro {
   bool _aceitaBusca(Produto p) {
     final t = normalizar(busca);
     if (t.isEmpty) return true;
-    return [p.nome, p.descricao, p.paisOrigem, p.marca]
-        .any((campo) => normalizar(campo).contains(t));
+    return [p.nome, p.descricao, p.paisOrigem, p.marca].any((campo) => normalizar(campo).contains(t));
   }
 
   bool _aceitaTipo(Produto p) => switch (tipo) {
@@ -167,12 +165,10 @@ class ProdutoFiltro {
         TipoFiltro.acessorios => p.isAcessorio,
       };
 
-  bool _aceitaCategoria(Produto p) =>
-      !categoriaVisivel || categorias.isEmpty || categorias.contains(p.categoria);
+  bool _aceitaCategoria(Produto p) => !categoriaVisivel || categorias.isEmpty || categorias.contains(p.categoria);
 
   bool _aceitaPreco(Produto p) =>
-      (precoMin == null || p.preco >= precoMin!) &&
-      (precoMax == null || p.preco <= precoMax!);
+      (precoMin == null || p.preco >= precoMin!) && (precoMax == null || p.preco <= precoMax!);
 
   int _comparar(Produto a, Produto b) {
     final r = switch (ordenacao) {

@@ -73,17 +73,12 @@ class UsuarioFiltro {
         ordenacao != OrdenacaoUsuario.maisRecentes,
       ].where((a) => a).length;
 
-  bool get temFiltroAtivo =>
-      busca.trim().isNotEmpty || status != StatusFiltro.todos || avancadosAtivos > 0;
+  bool get temFiltroAtivo => busca.trim().isNotEmpty || status != StatusFiltro.todos || avancadosAtivos > 0;
 
   List<Usuario> aplicar(List<Usuario> usuarios, {DateTime? agora}) {
     final hoje = _soData(agora ?? DateTime.now());
     final resultado = usuarios
-        .where((u) =>
-            status.aceita(u.ativo) &&
-            _aceitaBusca(u) &&
-            _aceitaPerfil(u) &&
-            _aceitaPeriodo(u, hoje))
+        .where((u) => status.aceita(u.ativo) && _aceitaBusca(u) && _aceitaPerfil(u) && _aceitaPeriodo(u, hoje))
         .toList();
     resultado.sort(_comparar);
     return resultado;
@@ -94,8 +89,7 @@ class UsuarioFiltro {
     if (termo.isEmpty) return true;
     if (pareceNumeroMascarado(termo)) {
       final digitos = apenasDigitos(termo);
-      return apenasDigitos(u.cpf).contains(digitos) ||
-          apenasDigitos(u.telefone).contains(digitos);
+      return apenasDigitos(u.cpf).contains(digitos) || apenasDigitos(u.telefone).contains(digitos);
     }
     final t = normalizar(termo);
     return normalizar(u.nome).contains(t) || normalizar(u.email).contains(t);

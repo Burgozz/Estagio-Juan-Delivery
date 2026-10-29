@@ -41,17 +41,47 @@ Future<void> _enviar(WidgetTester tester, _Labels l) async {
 /// Mensagens que o backend devolve (formato do GlobalExceptionHandler) e o
 /// campo embaixo do qual cada uma deve aparecer.
 final _errosDaApi = <(String descricao, Map<String, Object> corpo, String Function(_Labels) campo, String msg)>[
-  ('domínio de e-mail inexistente', {'erros': ['Domínio de e-mail inválido ou inexistente']},
-      (l) => l.email, 'Domínio de e-mail inválido ou inexistente'),
+  (
+    'domínio de e-mail inexistente',
+    {
+      'erros': ['Domínio de e-mail inválido ou inexistente']
+    },
+    (l) => l.email,
+    'Domínio de e-mail inválido ou inexistente'
+  ),
   ('e-mail duplicado', {'erro': 'Email já cadastrado'}, (l) => l.email, 'Email já cadastrado'),
-  ('CPF recusado', {'erros': ['CPF inválido']}, (l) => l.cpf, 'CPF inválido'),
-  ('telefone recusado',
-      {'erros': ['Telefone inválido. Informe apenas números com DDD (10 ou 11 dígitos)']},
-      (l) => l.telefone, 'Telefone inválido. Informe apenas números com DDD (10 ou 11 dígitos)'),
-  ('nome recusado', {'erros': ['Nome deve ter entre 2 e 100 caracteres']},
-      (l) => l.nome, 'Nome deve ter entre 2 e 100 caracteres'),
-  ('senha recusada', {'erros': ['Senha deve ter no mínimo 6 caracteres']},
-      (l) => l.senha, 'Senha deve ter no mínimo 6 caracteres'),
+  (
+    'CPF recusado',
+    {
+      'erros': ['CPF inválido']
+    },
+    (l) => l.cpf,
+    'CPF inválido'
+  ),
+  (
+    'telefone recusado',
+    {
+      'erros': ['Telefone inválido. Informe apenas números com DDD (10 ou 11 dígitos)']
+    },
+    (l) => l.telefone,
+    'Telefone inválido. Informe apenas números com DDD (10 ou 11 dígitos)'
+  ),
+  (
+    'nome recusado',
+    {
+      'erros': ['Nome deve ter entre 2 e 100 caracteres']
+    },
+    (l) => l.nome,
+    'Nome deve ter entre 2 e 100 caracteres'
+  ),
+  (
+    'senha recusada',
+    {
+      'erros': ['Senha deve ter no mínimo 6 caracteres']
+    },
+    (l) => l.senha,
+    'Senha deve ter no mínimo 6 caracteres'
+  ),
 ];
 
 void main() {
@@ -83,8 +113,7 @@ void main() {
       final api = ApiFalsa((_) => respostaJson({}, 201));
       await api.executar(() async {
         await abrir(tester, api);
-        await _preencher(tester, _cadastro,
-            cpf: '11144477736', telefone: '439999', email: 'maria@semponto');
+        await _preencher(tester, _cadastro, cpf: '11144477736', telefone: '439999', email: 'maria@semponto');
         await _enviar(tester, _cadastro);
       });
       expect(erroNoCampo('CPF', 'CPF inválido'), findsOneWidget);
@@ -188,8 +217,7 @@ void main() {
       final api = ApiFalsa((_) => respostaJson({}, 201));
       await api.executar(() async {
         await abrir(tester);
-        await _preencher(tester, _formAdmin,
-            cpf: '11111111111', telefone: '0433333444', email: 'sem-arroba');
+        await _preencher(tester, _formAdmin, cpf: '11111111111', telefone: '0433333444', email: 'sem-arroba');
         await _enviar(tester, _formAdmin);
       });
       expect(erroNoCampo('CPF *', 'CPF inválido'), findsOneWidget);
@@ -214,8 +242,13 @@ void main() {
     testWidgets('edição mostra CPF/telefone mascarados e envia só dígitos', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 7}, 200));
       final existente = Usuario(
-        id: 7, nome: 'José Antônio', cpf: '11144477735', email: 'jose@juan.com',
-        senha: '123456', telefone: '4333334444', dataCadastro: '2026-10-01');
+          id: 7,
+          nome: 'José Antônio',
+          cpf: '11144477735',
+          email: 'jose@juan.com',
+          senha: '123456',
+          telefone: '4333334444',
+          dataCadastro: '2026-10-01');
       await api.executar(() async {
         await abrir(tester, usuario: existente);
         expect(find.text('111.444.777-35'), findsOneWidget);

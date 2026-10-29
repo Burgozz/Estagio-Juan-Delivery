@@ -453,7 +453,10 @@ class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver
     final cards = [
       (_ExplorarInfo('Vinhos', '🍷', kPrimary), () => widget.onNavegarCatalogo(tipo: 'VINHO')),
       (_ExplorarInfo('Acessórios', '🛍️', const Color(0xFF6A3EA1)), () => widget.onNavegarCatalogo(tipo: 'ACESSORIO')),
-      (_ExplorarInfo('Espumantes', '🍾', const Color(0xFF8C2F63)), () => widget.onNavegarCatalogo(categoria: 'VINHO_ESPUMANTE')),
+      (
+        _ExplorarInfo('Espumantes', '🍾', const Color(0xFF8C2F63)),
+        () => widget.onNavegarCatalogo(categoria: 'VINHO_ESPUMANTE')
+      ),
       (_ExplorarInfo('Harmonizações', '🍽️', kCreme), () => widget.onNavegarCatalogo()),
     ];
     return Padding(
@@ -516,9 +519,7 @@ class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Text(
-              _categoriaAtiva != null
-                  ? 'Nenhum produto encontrado para esta categoria'
-                  : 'Nenhum produto encontrado',
+              _categoriaAtiva != null ? 'Nenhum produto encontrado para esta categoria' : 'Nenhum produto encontrado',
               textAlign: TextAlign.center,
               style: const TextStyle(color: kTextSecondary, fontSize: 15),
             ),
