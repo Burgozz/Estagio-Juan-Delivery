@@ -8,9 +8,57 @@ Escopo do estágio: apenas a experiência do usuário/cliente.
 ## Stack
 - **Backend:** Java 21, Spring Boot 3.4.5, Maven
 - **Frontend:** Flutter 3.5 (Dart)
-- **Banco:** PostgreSQL 18, porta 5433, banco: api_delivery
+- **Banco:** PostgreSQL 18, porta 5432, banco: api_delivery (configurado em `api-delivery/src/main/resources/application.properties`)
+  - ⚠️ A senha do banco está em texto puro no `application.properties`, que é versionado no git.
 - **IDE:** VS Code + IntelliJ IDEA Ultimate
 - **Versionamento:** GitHub
+
+## Estrutura de Pastas
+```
+api-delivery/                      backend (Spring Boot)
+  src/main/java/com/juan/api_delivery/
+    ApiDeliveryApplication.java
+    auth/        AuthController, LoginDTO, LoginRespostaDTO, CredenciaisInvalidasException
+    usuario/     Usuario, PerfilUsuario, UsuarioController, UsuarioService, UsuarioRepository, UsuarioDTO
+    endereco/    Endereco, EnderecoController, EnderecoService, EnderecoRepository, EnderecoDTO, EnderecoRespostaDTO
+    produto/     Produto, Vinho, Acessorio, TipoProduto, CategoriaProduto, ProdutoController, ProdutoService,
+                 ProdutoRepository, VinhoRepository, AcessorioRepository, ProdutoDTO, ProdutoRespostaDTO,
+                 ProdutoNaoEncontradoException
+    pedido/      Pedido, ItemPedido, StatusPedido, PedidoController, ItemPedidoController, PedidoService,
+                 ItemPedidoService, PedidoRepository, ItemPedidoRepository, PedidoDTO, ItemPedidoDTO
+    shared/
+      config/      CorsConfig, DataInitializer
+      exception/   GlobalExceptionHandler, MensagensErro
+      validation/  CpfValidator, @CpfValido, EmailDomainValidator, @EmailDominioValido (+ validators)
+  src/test/java/com/juan/api_delivery/   mesma estrutura de pacotes do main
+                                         (shared/IntegracaoBase = base dos testes de integração, H2)
+
+app_delivery/                      frontend (Flutter), pacote Dart `front_delivery`
+  lib/
+    main.dart        só o main() (registra o CarrinhoController no provider)
+    app.dart         MyApp (MaterialApp, tema, tela inicial)
+    main_screen.dart MainScreen (BottomNavigationBar por perfil)
+    core/
+      config/    api_config.dart (host/porta da API)
+      theme/     app_colors.dart (todas as cores compartilhadas), app_theme.dart (ThemeData), auth_theme.dart
+      session/   sessao_usuario.dart
+      network/   api_erro.dart (parseErro)
+      utils/     cpf_validator, harmonizacao_validator, input_formatters, paises
+      widgets/   label_obrigatorio
+    features/
+      auth/      screens/ (login, cadastro), services/ (auth_service)
+      inicio/    screens/ (inicio_screen, com carrossel)
+      catalogo/  models/ (produto), services/ (produto_service), screens/ (catalogo, produto_detalhe)
+      carrinho/  controllers/ (carrinho_controller), screens/ (carrinho), widgets/ (carrinho_appbar_action)
+      pedidos/   models/ (pedido, item_pedido), services/ (pedido_service),
+                 screens/ (pedidos, detalhes_pedido, confirmacao_pedido, pedido_concluido)
+      perfil/    models/ (usuario, endereco), services/ (usuario_service, endereco_service),
+                 screens/ (perfil, meus_dados, endereco, alterar_senha)
+      admin/     filters/, screens/ (listas e formulários de usuário e produto), widgets/ (busca, filtros, chips...)
+  test/            mesma estrutura de lib/ (core/, features/admin/) + helpers/api_falsa.dart
+```
+Regra: código usado por uma feature só fica dentro dela; o que é usado por várias vai para `core/`.
+Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as outras importam de lá.
 
 ## Identidade Visual
 - Cor primária: `#3C0731` (vinho escuro)
@@ -27,13 +75,16 @@ Escopo do estágio: apenas a experiência do usuário/cliente.
 - Soft delete: nunca usar DELETE físico em `Usuario` e `Produto`, setar `ativo = false`
 - Produtos com estoque zero são desativados automaticamente (`ativo = false`)
 - `DataInitializer` cria admin padrão ao subir o backend
+- Pacotes por funcionalidade (`usuario/`, `produto/`...): controller, service, repository, entidade e DTOs juntos
+- Injeção de dependência por construtor: campos `private final` + `@RequiredArgsConstructor`
+- Mensagens de erro repetidas ficam em `shared/exception/MensagensErro`
 
 ## Padrões de Erro
 - `GlobalExceptionHandler` intercepta todas as exceções
 - `MethodArgumentNotValidException` → `{"erros": ["msg1", "msg2"]}`
 - `IllegalArgumentException` / `RuntimeException` → `{"erro": "mensagem"}`
 - Sempre usar `@Valid` no `@RequestBody` nos controllers
-- Flutter trata via `_parseErro()` já implementado nos services
+- Flutter trata via `parseErro()` de `lib/core/network/api_erro.dart`, usado por todos os services
 
 ## Padrões Flutter
 - Pacote `http` puro — nunca usar Dio ou Retrofit
@@ -45,6 +96,15 @@ Escopo do estágio: apenas a experiência do usuário/cliente.
 - Erros de API exibidos inline embaixo do campo via `String? _xApiError`
 - Sempre usar `Form` + `GlobalKey<FormState>` + `validator` nos formulários
 - Carrinho: `CarrinhoController` com `ChangeNotifier` via `provider`
+- Cores: sempre pelas constantes de `lib/core/theme/app_colors.dart` (`kPrimary`, `kBackground`, `kCreme`...);
+  nunca redeclarar `kPrimary` numa tela. Paletas exclusivas de uma tela (status, categorias) ficam na tela
+- `dart format` com largura de 120 colunas (configurado em `analysis_options.yaml`)
+
+## Testes
+- Backend: `mvn test` (integração em H2, perfil `test`). Frontend: `flutter test`
+- Alguns testes falham de propósito: documentam bugs conhecidos, marcados com o comentário
+  `BUG ENCONTRADO` (validações que só existem na entidade e não no DTO, limites de safra divergentes,
+  senha do admin com 5 caracteres etc.). Não "corrigir" o teste; corrigir o código
 
 ## Entidades Principais
 - `Usuario`: id, nome, email, senha, telefone, cpf, dataCadastro, ativo, perfil
