@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:front_delivery/models/usuario.dart';
-import 'package:front_delivery/screens/cadastro_screen.dart';
-import 'package:front_delivery/screens/login_screen.dart';
-import 'package:front_delivery/screens/usuario_form_screen.dart';
+import 'package:front_delivery/features/perfil/models/usuario.dart';
+import 'package:front_delivery/features/auth/screens/cadastro_screen.dart';
+import 'package:front_delivery/features/auth/screens/login_screen.dart';
+import 'package:front_delivery/features/admin/screens/usuario_form_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/api_falsa.dart';

@@ -3,15 +3,15 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:front_delivery/filters/produto_filtro.dart';
-import 'package:front_delivery/filters/status_filtro.dart';
-import 'package:front_delivery/filters/texto_busca.dart';
-import 'package:front_delivery/filters/usuario_filtro.dart';
-import 'package:front_delivery/models/produto.dart';
-import 'package:front_delivery/models/usuario.dart';
+import 'package:front_delivery/features/admin/filters/produto_filtro.dart';
+import 'package:front_delivery/features/admin/filters/status_filtro.dart';
+import 'package:front_delivery/features/admin/filters/texto_busca.dart';
+import 'package:front_delivery/features/admin/filters/usuario_filtro.dart';
+import 'package:front_delivery/features/catalogo/models/produto.dart';
+import 'package:front_delivery/features/perfil/models/usuario.dart';
 import 'package:front_delivery/core/utils/cpf_validator.dart';
 import 'package:front_delivery/core/utils/input_formatters.dart';
-import 'package:front_delivery/widgets/pais_autocomplete_field.dart';
+import 'package:front_delivery/features/admin/widgets/pais_autocomplete_field.dart';
 
 List<int?> _ids(List list) => list.map((e) => e.id as int?).toList();
 
