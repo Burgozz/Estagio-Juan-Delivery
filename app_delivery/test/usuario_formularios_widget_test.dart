@@ -259,9 +259,6 @@ void main() {
       expect(corpo['telefone'], '4333334444');
     });
 
-    // BUG ENCONTRADO (no caso "domínio de e-mail inexistente"): usuario_form_screen.dart
-    // só procura "email" na mensagem; o texto do backend é "Domínio de e-mail ...",
-    // com hífen, então o erro vai para um SnackBar em vez de ficar embaixo do campo.
     for (final (descricao, corpo, campoDe, msg) in _errosDaApi) {
       testWidgets('erro da API ($descricao) aparece inline no campo certo', (tester) async {
         final api = ApiFalsa((_) => respostaJson(corpo, 400));

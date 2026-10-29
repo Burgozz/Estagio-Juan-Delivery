@@ -69,7 +69,9 @@ class _UsuarioFormScreenState extends State<UsuarioFormScreen> {
       final mensagem = e.toString().replaceFirst('Exception: ', '');
       if (mounted) {
         final msgLower = mensagem.toLowerCase();
-        if (msgLower.contains('email')) {
+        // "Domínio de e-mail inválido ou inexistente" (EmailDominioValido) também
+        // é erro do campo email, apesar de escrito com hífen.
+        if (msgLower.contains('email') || msgLower.contains('e-mail') || msgLower.contains('domínio')) {
           setState(() => _emailApiError = mensagem);
           _formKey.currentState!.validate();
         } else if (msgLower.contains('cpf')) {
