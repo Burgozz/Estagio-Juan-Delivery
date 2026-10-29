@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../controllers/carrinho_controller.dart';
 import '../../pedidos/services/pedido_service.dart';
 import '../../../core/session/sessao_usuario.dart';
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import '../../pedidos/screens/confirmacao_pedido_screen.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Tela do carrinho de compras: lista os itens adicionados, permite ajustar
 /// quantidades e finaliza o pedido chamando POST /pedidos e

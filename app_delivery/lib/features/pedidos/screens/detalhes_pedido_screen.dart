@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/item_pedido.dart';
 import '../models/pedido.dart';
 import '../services/pedido_service.dart';
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import 'pedido_concluido_screen.dart';
+import '../../../core/theme/app_colors.dart';
 
 const _kStatusLabels = {
   'PENDENTE': 'Pendente',

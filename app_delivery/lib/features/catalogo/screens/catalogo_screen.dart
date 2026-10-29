@@ -3,11 +3,7 @@ import '../models/produto.dart';
 import '../services/produto_service.dart';
 import '../../carrinho/widgets/carrinho_appbar_action.dart';
 import 'produto_detalhe_screen.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kBackground = Color(0xFFFAFAFA);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 const Map<String, String> _categoriaLabels = {
   'VINHO_TINTO': 'Tinto',

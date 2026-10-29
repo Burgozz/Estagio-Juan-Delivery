@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary;
 import 'detalhes_pedido_screen.dart';
-
-const _kCreme = Color(0xFFF5E6C8);
+import '../../../core/theme/app_colors.dart';
 
 /// Tela exibida logo após a criação bem-sucedida do pedido.
 class ConfirmacaoPedidoScreen extends StatelessWidget {
@@ -20,7 +18,7 @@ class ConfirmacaoPedidoScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle, color: _kCreme, size: 120),
+              const Icon(Icons.check_circle, color: kCreme, size: 120),
               const SizedBox(height: 28),
               const Text(
                 'Pedido Realizado!',
@@ -31,7 +29,7 @@ class ConfirmacaoPedidoScreen extends StatelessWidget {
               const Text(
                 'Seu pedido foi recebido e está sendo processado',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _kCreme, fontSize: 15),
+                style: TextStyle(color: kCreme, fontSize: 15),
               ),
               const SizedBox(height: 44),
               SizedBox(

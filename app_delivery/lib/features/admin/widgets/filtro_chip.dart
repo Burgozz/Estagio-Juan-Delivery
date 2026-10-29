@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-const _kPrimary = Color(0xFF3C0731);
-const _kTextPrimary = Color(0xFF212121);
+import '../../../core/theme/app_colors.dart';
 
 /// Chip de seleção na identidade do app: selecionado com fundo vinho e
 /// texto branco; não selecionado com fundo branco e borda cinza.
@@ -24,14 +22,14 @@ class FiltroChip extends StatelessWidget {
       selected: selecionado,
       onSelected: (_) => onTap(),
       showCheckmark: false,
-      selectedColor: _kPrimary,
+      selectedColor: kPrimary,
       backgroundColor: Colors.white,
       labelStyle: TextStyle(
-        color: selecionado ? Colors.white : _kTextPrimary,
+        color: selecionado ? Colors.white : kTextPrimary,
         fontWeight: selecionado ? FontWeight.w600 : FontWeight.w400,
         fontSize: 13,
       ),
-      side: BorderSide(color: selecionado ? _kPrimary : Colors.grey.shade400),
+      side: BorderSide(color: selecionado ? kPrimary : Colors.grey.shade400),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
     );

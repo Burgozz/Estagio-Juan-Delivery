@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-const _kPrimary = Color(0xFF3C0731);
-const _kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 /// Linha discreta acima da lista: "X resultados" e, se houver algum filtro
 /// ativo, o link "Limpar filtros".
@@ -27,14 +25,14 @@ class ResultadosHeader extends StatelessWidget {
           children: [
             Text(
               total == 1 ? '1 resultado' : '$total resultados',
-              style: const TextStyle(color: _kTextSecondary, fontSize: 13),
+              style: const TextStyle(color: kTextSecondary, fontSize: 13),
             ),
             const Spacer(),
             if (filtrosAtivos)
               TextButton(
                 onPressed: onLimpar,
                 style: TextButton.styleFrom(
-                  foregroundColor: _kPrimary,
+                  foregroundColor: kPrimary,
                   textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
                 child: const Text('Limpar filtros'),
@@ -60,19 +58,19 @@ class SemResultados extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 56, color: _kPrimary),
+            const Icon(Icons.search_off, size: 56, color: kPrimary),
             const SizedBox(height: 16),
             const Text(
               'Nenhum resultado para os filtros aplicados',
               textAlign: TextAlign.center,
-              style: TextStyle(color: _kTextSecondary, fontSize: 15),
+              style: TextStyle(color: kTextSecondary, fontSize: 15),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: onLimpar,
               style: OutlinedButton.styleFrom(
-                foregroundColor: _kPrimary,
-                side: const BorderSide(color: _kPrimary),
+                foregroundColor: kPrimary,
+                side: const BorderSide(color: kPrimary),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Limpar filtros'),

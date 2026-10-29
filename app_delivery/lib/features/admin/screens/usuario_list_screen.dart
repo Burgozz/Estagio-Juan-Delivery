@@ -9,11 +9,7 @@ import '../widgets/painel_filtros.dart';
 import '../widgets/resultados_header.dart';
 import '../widgets/status_chips.dart';
 import 'usuario_form_screen.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kBackground = Color(0xFFFAFAFA);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 class UsuarioListScreen extends StatefulWidget {
   const UsuarioListScreen({super.key});

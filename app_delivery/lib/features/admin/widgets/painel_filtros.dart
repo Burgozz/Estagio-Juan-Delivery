@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-
-const _kPrimary = Color(0xFF3C0731);
-const _kTextPrimary = Color(0xFF212121);
-const _kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 /// Abre o painel "Filtros" em um bottom sheet. [rascunho] é o estado inicial;
 /// [construir] monta as seções a partir do rascunho atual e de um `atualizar`
@@ -47,7 +44,7 @@ Future<T?> abrirPainelFiltros<T>({
                   child: Text(
                     'Filtros',
                     style: TextStyle(
-                        color: _kPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+                        color: kPrimary, fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Flexible(
@@ -68,8 +65,8 @@ Future<T?> abrirPainelFiltros<T>({
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(ctx, limpar(atual)),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: _kPrimary,
-                            side: const BorderSide(color: _kPrimary),
+                            foregroundColor: kPrimary,
+                            side: const BorderSide(color: kPrimary),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
@@ -116,7 +113,7 @@ class SecaoFiltro extends StatelessWidget {
               Text(
                 titulo,
                 style: const TextStyle(
-                    color: _kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+                    color: kTextPrimary, fontWeight: FontWeight.w600, fontSize: 14),
               ),
               const Spacer(),
               if (trailing != null) trailing!,
@@ -137,5 +134,5 @@ class DicaFiltro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Text(texto, style: const TextStyle(color: _kTextSecondary, fontSize: 12));
+      Text(texto, style: const TextStyle(color: kTextSecondary, fontSize: 12));
 }

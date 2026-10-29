@@ -3,13 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/session/sessao_usuario.dart';
 import 'core/theme/app_colors.dart';
-import 'features/catalogo/screens/catalogo_screen.dart' show CatalogoScreen;
-import 'features/inicio/screens/inicio_screen.dart' show InicioScreen;
-import 'features/auth/screens/login_screen.dart' show LoginScreen;
-import 'features/pedidos/screens/pedidos_screen.dart' show PedidosScreen;
-import 'features/perfil/screens/perfil_screen.dart' show PerfilScreen;
-import 'features/admin/screens/produto_list_screen.dart' show ProdutoListScreen;
-import 'features/admin/screens/usuario_list_screen.dart' show UsuarioListScreen;
+import 'features/catalogo/screens/catalogo_screen.dart';
+import 'features/inicio/screens/inicio_screen.dart';
+import 'features/auth/screens/login_screen.dart';
+import 'features/pedidos/screens/pedidos_screen.dart';
+import 'features/perfil/screens/perfil_screen.dart';
+import 'features/admin/screens/produto_list_screen.dart';
+import 'features/admin/screens/usuario_list_screen.dart';
 
 /// Tela principal pós-login, com a BottomNavigationBar.
 ///

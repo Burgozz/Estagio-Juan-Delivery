@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../screens/produto_form_screen.dart' show kPrimary, kTextPrimary, kTextSecondary;
 import '../../../core/utils/paises.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
+import '../../../core/theme/app_colors.dart';
 
 /// Remove acentos e normaliza para minúsculas, para permitir busca e
 /// validação de país sem distinção entre maiúsculas/minúsculas e ignorando

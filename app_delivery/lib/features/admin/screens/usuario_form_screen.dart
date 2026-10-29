@@ -5,10 +5,7 @@ import '../../perfil/services/usuario_service.dart';
 import '../../../core/utils/input_formatters.dart';
 import '../../../core/utils/cpf_validator.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 class UsuarioFormScreen extends StatefulWidget {
   final Usuario? usuario;

@@ -6,12 +6,7 @@ import '../models/endereco.dart';
 import '../services/endereco_service.dart';
 import '../../../core/session/sessao_usuario.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kBackground = Color(0xFFFAFAFA);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
-const kAutoFillColor = Color(0xFFF0E8EF);
+import '../../../core/theme/app_colors.dart';
 
 /// Lista os endereços do usuário logado (GET /usuarios/{id}/enderecos),
 /// permitindo cadastrar novos e excluir existentes.

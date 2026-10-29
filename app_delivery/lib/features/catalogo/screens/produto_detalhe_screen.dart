@@ -4,7 +4,8 @@ import '../../carrinho/controllers/carrinho_controller.dart';
 import '../models/produto.dart';
 import '../services/produto_service.dart';
 import '../../carrinho/widgets/carrinho_appbar_action.dart';
-import 'catalogo_screen.dart' show labelCategoria, labelTipo, kPrimary, kBackground, kTextPrimary, kTextSecondary;
+import 'catalogo_screen.dart' show labelCategoria, labelTipo;
+import '../../../core/theme/app_colors.dart';
 
 class ProdutoDetalheScreen extends StatefulWidget {
   final int id;

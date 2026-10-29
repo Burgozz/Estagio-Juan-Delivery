@@ -5,10 +5,7 @@ import '../../catalogo/services/produto_service.dart';
 import '../../../core/utils/harmonizacao_validator.dart';
 import '../widgets/pais_autocomplete_field.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 class ProdutoFormScreen extends StatefulWidget {
   final Produto? produto;

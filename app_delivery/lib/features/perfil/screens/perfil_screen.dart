@@ -5,14 +5,7 @@ import '../../auth/screens/login_screen.dart';
 import 'meus_dados_screen.dart';
 import 'endereco_screen.dart';
 import 'alterar_senha_screen.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kGradienteFim = Color(0xFF5C1151);
-const kBackground = Color(0xFFFAFAFA);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
-const kCreme = Color(0xFFF5E6C8);
-const kPerigo = Color(0xFFD32F2F);
+import '../../../core/theme/app_colors.dart';
 
 /// Tela de Perfil, terceira aba da BottomNavigationBar para usuários com
 /// perfil CLIENTE. Reúne dados da conta, endereços, configurações e logout.

@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-const _kPrimary = Color(0xFF3C0731);
-const _kTextPrimary = Color(0xFF212121);
-const _kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 /// Barra de busca em formato pill com botão "Filtros" ao lado.
 ///
@@ -95,18 +92,18 @@ class _BarraBuscaFiltrosState extends State<BarraBuscaFiltros> {
               child: TextField(
                 controller: widget.controller,
                 onChanged: _aoDigitar,
-                style: const TextStyle(color: _kTextPrimary),
-                cursorColor: _kPrimary,
+                style: const TextStyle(color: kTextPrimary),
+                cursorColor: kPrimary,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: widget.hint,
-                  hintStyle: const TextStyle(color: _kTextSecondary),
-                  prefixIcon: const Icon(Icons.search, color: _kTextSecondary),
+                  hintStyle: const TextStyle(color: kTextSecondary),
+                  prefixIcon: const Icon(Icons.search, color: kTextSecondary),
                   suffixIcon: widget.controller.text.isEmpty
                       ? null
                       : IconButton(
                           tooltip: 'Limpar busca',
-                          icon: const Icon(Icons.close, color: _kTextSecondary, size: 20),
+                          icon: const Icon(Icons.close, color: kTextSecondary, size: 20),
                           onPressed: _limpar,
                         ),
                   filled: false,
@@ -138,9 +135,9 @@ class _BotaoFiltros extends StatelessWidget {
     return Tooltip(
       message: 'Filtros',
       child: Material(
-        color: destacado ? _kPrimary : Colors.white,
+        color: destacado ? kPrimary : Colors.white,
         shape: CircleBorder(
-          side: BorderSide(color: destacado ? _kPrimary : Colors.black12),
+          side: BorderSide(color: destacado ? kPrimary : Colors.black12),
         ),
         child: InkWell(
           customBorder: const CircleBorder(),
@@ -152,12 +149,12 @@ class _BotaoFiltros extends StatelessWidget {
               isLabelVisible: destacado,
               label: Text('$ativos'),
               backgroundColor: Colors.white,
-              textColor: _kPrimary,
+              textColor: kPrimary,
               offset: const Offset(6, -6),
               alignment: AlignmentDirectional.topEnd,
               child: Center(
                 child: Icon(Icons.tune,
-                    color: destacado ? Colors.white : _kPrimary, size: 22),
+                    color: destacado ? Colors.white : kPrimary, size: 22),
               ),
             ),
           ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// Paleta e estilos das telas de autenticação (Login/Cadastro). É um
 /// esquema escuro próprio, deliberadamente diferente do tema claro usado
-/// no restante do app (ver kBackground/kSurface em main.dart).
-const kAuthBackground = Color(0xFF3C0731);
+/// no restante do app (ver kBackground/kSurface em app_colors.dart).
+const kAuthBackground = kPrimary;
 const kAuthCard = Color(0xFF1E1E1E);
 const kAuthFieldFill = Color(0xFF3A3A3A);
 const kAuthFieldBorder = Color(0xFF555555);
@@ -11,11 +13,11 @@ const kAuthFieldBorderFocused = Color(0xFF888888);
 const kAuthFieldText = Colors.white;
 const kAuthLabel = Color(0xFFAAAAAA);
 const kAuthIcon = Color(0xFFAAAAAA);
-const kAuthButton = Color(0xFF5C1151);
-const kAuthTitle = Color(0xFFF5E6C8);
+const kAuthButton = kGradienteFim;
+const kAuthTitle = kCreme;
 const kAuthLinkMuted = Color(0xFFBBBBBB);
-const kAuthLinkHighlight = Color(0xFFF5E6C8);
-const kAuthError = Color(0xFFFF6B6B);
+const kAuthLinkHighlight = kCreme;
+const kAuthError = kErroInline;
 
 /// Decoração padrão dos campos de texto das telas de autenticação:
 /// fundo cinza médio, borda sutil (mais clara quando focada) e

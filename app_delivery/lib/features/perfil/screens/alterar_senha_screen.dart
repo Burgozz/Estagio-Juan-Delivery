@@ -3,11 +3,7 @@ import '../models/usuario.dart';
 import '../services/usuario_service.dart';
 import '../../../core/session/sessao_usuario.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
-
-const kPrimary = Color(0xFF3C0731);
-const kBackground = Color(0xFFFAFAFA);
-const kTextPrimary = Color(0xFF212121);
-const kTextSecondary = Color(0xFF757575);
+import '../../../core/theme/app_colors.dart';
 
 /// Permite ao usuário logado trocar a própria senha. Como o backend não
 /// tem um endpoint dedicado, os demais dados do usuário são recarregados

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../main_screen.dart' show MainScreen;
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary, kTextSecondary;
+import '../../../core/theme/app_colors.dart';
 
 /// Tela final do fluxo, exibida após a entrega ser confirmada em
 /// DetalhesPedidoScreen. O botão "Voltar ao início" limpa todo o histórico
@@ -11,7 +11,7 @@ class PedidoConcluidoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: kBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),

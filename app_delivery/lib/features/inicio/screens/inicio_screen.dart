@@ -5,12 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../catalogo/models/produto.dart';
 import '../../catalogo/services/produto_service.dart';
 import '../../carrinho/widgets/carrinho_appbar_action.dart';
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import '../../catalogo/screens/produto_detalhe_screen.dart';
-
-/// Creme usado nos textos secundários da AppBar e em elementos de destaque,
-/// mesmo tom já usado nas telas de autenticação (kAuthTitle).
-const _kCreme = Color(0xFFF5E6C8);
+import '../../../core/theme/app_colors.dart';
 
 /// Fundo dos ícones de categoria.
 const _kCategoriaBg = Color(0xFFF0E8EF);
@@ -52,7 +48,7 @@ class _BannerInfo {
 
 const _banners = [
   _BannerInfo('Vinhos tintos selecionados', 'Os melhores rótulos com até 20% off', kPrimary),
-  _BannerInfo('Espumantes para celebrar', 'Brinde os momentos especiais', Color(0xFF5C1151)),
+  _BannerInfo('Espumantes para celebrar', 'Brinde os momentos especiais', kGradienteFim),
   _BannerInfo('Novos acessórios chegaram', 'Taças, decanters e muito mais', Color(0xFF8C2F63)),
 ];
 
@@ -283,7 +279,7 @@ class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver
             const SizedBox(height: 2),
             const Text(
               'Seu marketplace de vinhos',
-              style: TextStyle(color: _kCreme, fontSize: 13, fontWeight: FontWeight.w400),
+              style: TextStyle(color: kCreme, fontSize: 13, fontWeight: FontWeight.w400),
             ),
           ],
         ),
@@ -423,7 +419,7 @@ class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver
                       const SizedBox(height: 8),
                       Text(
                         b.subtitulo,
-                        style: const TextStyle(color: _kCreme, fontSize: 13),
+                        style: const TextStyle(color: kCreme, fontSize: 13),
                       ),
                     ],
                   ),
@@ -458,7 +454,7 @@ class _InicioScreenState extends State<InicioScreen> with WidgetsBindingObserver
       (_ExplorarInfo('Vinhos', '🍷', kPrimary), () => widget.onNavegarCatalogo(tipo: 'VINHO')),
       (_ExplorarInfo('Acessórios', '🛍️', const Color(0xFF6A3EA1)), () => widget.onNavegarCatalogo(tipo: 'ACESSORIO')),
       (_ExplorarInfo('Espumantes', '🍾', const Color(0xFF8C2F63)), () => widget.onNavegarCatalogo(categoria: 'VINHO_ESPUMANTE')),
-      (_ExplorarInfo('Harmonizações', '🍽️', _kCreme), () => widget.onNavegarCatalogo()),
+      (_ExplorarInfo('Harmonizações', '🍽️', kCreme), () => widget.onNavegarCatalogo()),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),

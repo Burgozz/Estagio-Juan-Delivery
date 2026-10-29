@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/pedido.dart';
 import '../services/pedido_service.dart';
 import '../../../core/session/sessao_usuario.dart';
-import '../../catalogo/screens/catalogo_screen.dart' show kPrimary, kBackground, kTextPrimary, kTextSecondary;
 import 'detalhes_pedido_screen.dart';
+import '../../../core/theme/app_colors.dart';
 
-const _kCreme = Color(0xFFF5E6C8);
 const _kHistoricoBg = Color(0xFFF5F5F5);
 
 const _kStatusEmAberto = ['PENDENTE', 'CONFIRMADO', 'EM_PREPARO', 'EM_ENTREGA'];
@@ -129,7 +128,7 @@ class _PedidosScreenState extends State<PedidosScreen> with SingleTickerProvider
           indicatorColor: Colors.white,
           indicatorWeight: 3,
           labelColor: Colors.white,
-          unselectedLabelColor: _kCreme,
+          unselectedLabelColor: kCreme,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600),
           tabs: const [
             Tab(text: 'Em Aberto'),
