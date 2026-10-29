@@ -1,10 +1,10 @@
 package com.juan.api_delivery.produto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.juan.api_delivery.pedido.ItemPedido;
 import com.juan.api_delivery.pedido.Pedido;
 import com.juan.api_delivery.pedido.StatusPedido;
 import com.juan.api_delivery.shared.IntegracaoBase;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.junit.jupiter.api.Nested;

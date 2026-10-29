@@ -1,12 +1,12 @@
 package com.juan.api_delivery.shared;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.juan.api_delivery.pedido.ItemPedidoRepository;
 import com.juan.api_delivery.pedido.PedidoRepository;
 import com.juan.api_delivery.produto.ProdutoRepository;
 import com.juan.api_delivery.shared.validation.EmailDomainValidatorTestSupport;
 import com.juan.api_delivery.usuario.UsuarioRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

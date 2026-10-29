@@ -1,7 +1,7 @@
 package com.juan.api_delivery.endereco;
 
-import com.juan.api_delivery.usuario.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.juan.api_delivery.usuario.Usuario;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

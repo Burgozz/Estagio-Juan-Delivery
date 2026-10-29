@@ -1,20 +1,20 @@
 package com.juan.api_delivery.usuario;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.juan.api_delivery.shared.IntegracaoBase;
 import com.juan.api_delivery.shared.validation.EmailDomainValidatorTestSupport;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 
-import javax.naming.CommunicationException;
-import javax.naming.NameNotFoundException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.naming.CommunicationException;
+import javax.naming.NameNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
