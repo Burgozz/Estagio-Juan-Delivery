@@ -151,9 +151,6 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
     });
 
-    // BUG ENCONTRADO: o cadastro não valida o tamanho mínimo da senha (6) nem do
-    // nome (2) no app. O pedido vai para o backend, que hoje responde com um texto
-    // técnico do Hibernate (ver bug do UsuarioDTO).
     testWidgets('senha com menos de 6 caracteres é barrada no app', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
@@ -165,7 +162,6 @@ void main() {
       expect(find.descendant(of: campo('Senha'), matching: find.textContaining('6')), findsOneWidget);
     });
 
-    // BUG ENCONTRADO: idem para nome com 1 letra.
     testWidgets('nome com 1 letra é barrado no app', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
