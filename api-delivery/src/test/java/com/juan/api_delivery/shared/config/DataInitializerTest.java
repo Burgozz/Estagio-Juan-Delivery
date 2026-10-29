@@ -28,7 +28,7 @@ class DataInitializerTest {
 
     @Test
     void aplicacaoSobeComBancoVazioECriaOAdmin() {
-        var admin = repository.findByEmail("admin@juan.com").orElseThrow();
+        var admin = repository.findByEmailIgnoreCase("admin@juan.com").orElseThrow();
         assertThat(admin.getPerfil()).isEqualTo(PerfilUsuario.ADMIN);
         assertThat(admin.getSenha()).isEqualTo("admin");
     }

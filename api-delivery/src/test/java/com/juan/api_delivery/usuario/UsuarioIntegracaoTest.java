@@ -59,7 +59,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("mascara@teste.com", "111.444.777-35"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.cpf").value("11144477735"));
-            assertThat(usuarioRepository.findByEmail("mascara@teste.com").orElseThrow().getCpf())
+            assertThat(usuarioRepository.findByEmailIgnoreCase("mascara@teste.com").orElseThrow().getCpf())
                 .isEqualTo("11144477735");
         }
 
@@ -81,7 +81,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("invalido@teste.com", cpf))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.erros", hasItem("CPF inválido")));
-            assertThat(usuarioRepository.findByEmail("invalido@teste.com")).isEmpty();
+            assertThat(usuarioRepository.findByEmailIgnoreCase("invalido@teste.com")).isEmpty();
         }
 
         // BUG ENCONTRADO: CpfValidator.somenteDigitos remove QUALQUER caractere que
@@ -116,7 +116,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("maria@dominioquenaoexiste123456.com", "11144477735"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.erros", hasItem(containsString("e-mail"))));
-            assertThat(usuarioRepository.findByEmail("maria@dominioquenaoexiste123456.com")).isEmpty();
+            assertThat(usuarioRepository.findByEmailIgnoreCase("maria@dominioquenaoexiste123456.com")).isEmpty();
         }
 
         @ParameterizedTest
@@ -161,14 +161,21 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .filter(u -> "dup@teste.com".equals(u.getEmail())).count()).isEqualTo(1);
         }
 
-        // BUG ENCONTRADO: a verificação de e-mail duplicado (findByEmail) diferencia
-        // maiúsculas de minúsculas, então "Dup@Teste.com" vira uma segunda conta
-        // para a mesma caixa de e-mail.
         @Test
         void emailDuplicadoComMaiusculasDiferentesTambemEBloqueado() throws Exception {
             postJson("/usuarios", usuario("caixa@teste.com", "11144477735")).andExpect(status().isCreated());
             postJson("/usuarios", usuario("Caixa@Teste.com", "52998224725"))
                 .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void emailEGravadoEmMinusculasELoginIgnoraMaiusculas() throws Exception {
+            postJson("/usuarios", usuario("Misto@Teste.com", "11144477735")).andExpect(status().isCreated());
+            assertThat(usuarioRepository.findAll().stream().map(Usuario::getEmail))
+                .contains("misto@teste.com")
+                .doesNotContain("Misto@Teste.com");
+            postJson("/auth/login", Map.of("email", "MISTO@teste.com", "senha", "123456"))
+                .andExpect(status().isOk());
         }
 
         @Test
@@ -302,7 +309,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.ativo").value(true))
                 .andExpect(jsonPath("$.dataCadastro").value(LocalDate.now().toString()));
 
-            Usuario salvo = usuarioRepository.findByEmail("novo@teste.com").orElseThrow();
+            Usuario salvo = usuarioRepository.findByEmailIgnoreCase("novo@teste.com").orElseThrow();
             assertThat(salvo.getPerfil()).isEqualTo(PerfilUsuario.CLIENTE);
             assertThat(salvo.isAtivo()).isTrue();
             assertThat(salvo.getDataCadastro()).isEqualTo(LocalDate.now());

@@ -318,7 +318,7 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
         void deletarProdutoComPedidosRetorna400EMantemNoBanco() throws Exception {
             long id = criar(vinho());
             Pedido pedido = pedidoRepository.save(Pedido.builder()
-                .usuario(usuarioRepository.findByEmail("admin@juan.com").orElseThrow())
+                .usuario(usuarioRepository.findByEmailIgnoreCase("admin@juan.com").orElseThrow())
                 .status(StatusPedido.ENTREGUE)
                 .dataPedido(LocalDateTime.now())
                 .valorTotal(new BigDecimal("89.90"))
