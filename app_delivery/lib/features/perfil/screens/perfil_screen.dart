@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/session/logout.dart';
 import '../../../core/session/sessao_usuario.dart';
-import '../../auth/screens/login_screen.dart';
 import 'meus_dados_screen.dart';
 import 'endereco_screen.dart';
 import 'alterar_senha_screen.dart';
@@ -11,50 +10,6 @@ import '../../../core/theme/app_colors.dart';
 /// perfil CLIENTE. Reúne dados da conta, endereços, configurações e logout.
 class PerfilScreen extends StatelessWidget {
   const PerfilScreen({super.key});
-
-  Future<void> _sairDaConta(BuildContext context) async {
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text(
-          'Sair da conta',
-          style: TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
-        ),
-        content: const Text(
-          'Deseja sair da conta?',
-          style: TextStyle(color: kTextPrimary),
-        ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: kTextSecondary),
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: kPerigo),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sair', style: TextStyle(fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-    if (confirmar != true) return;
-
-    SessaoUsuario.limpar();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('usuario_nome');
-    await prefs.remove('usuario_email');
-    await prefs.remove('usuario_id');
-    await prefs.remove('home_tab_index');
-
-    if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
 
   void _sobreOApp(BuildContext context) {
     showDialog(
@@ -159,7 +114,7 @@ class PerfilScreen extends StatelessWidget {
                 icon: Icons.logout,
                 titulo: 'Sair da conta',
                 cor: kPerigo,
-                onTap: () => _sairDaConta(context),
+                onTap: () => confirmarSairDaConta(context),
                 ultimo: true,
               ),
             ],
