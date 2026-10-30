@@ -25,6 +25,29 @@ bool paisValido(String texto) {
   return paisesDoMundo.any((p) => _normalizar(p['nome']!) == alvo);
 }
 
+final List<Map<String, String>> _paisesOrdenados = List<Map<String, String>>.from(paisesDoMundo)
+  ..sort((a, b) => _normalizar(a['nome']!).compareTo(_normalizar(b['nome']!)));
+
+/// Sugestões de país para o texto digitado, ignorando maiúsculas/minúsculas e
+/// acentos ("alba" encontra "Albânia"). Primeiro vêm os países que começam com
+/// o texto, depois os que só o contêm, cada grupo em ordem alfabética.
+/// Texto vazio devolve todos os países.
+List<Map<String, String>> sugestoesDePais(String texto) {
+  final consulta = _normalizar(texto.trim());
+  if (consulta.isEmpty) return _paisesOrdenados;
+  final comecam = <Map<String, String>>[];
+  final contem = <Map<String, String>>[];
+  for (final p in _paisesOrdenados) {
+    final nome = _normalizar(p['nome']!);
+    if (nome.startsWith(consulta)) {
+      comecam.add(p);
+    } else if (nome.contains(consulta)) {
+      contem.add(p);
+    }
+  }
+  return [...comecam, ...contem];
+}
+
 /// Campo de texto para o país de origem do vinho, com autocomplete em
 /// dropdown mostrando bandeira + nome de cada país.
 ///
@@ -48,8 +71,6 @@ class PaisAutocompleteField extends StatefulWidget {
 class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
   final _focusNode = FocusNode();
   final _layerLink = LayerLink();
-  final List<Map<String, String>> _paisesOrdenados = List<Map<String, String>>.from(paisesDoMundo)
-    ..sort((a, b) => _normalizar(a['nome']!).compareTo(_normalizar(b['nome']!)));
 
   OverlayEntry? _overlayEntry;
   List<Map<String, String>> _opcoesFiltradas = [];
@@ -82,10 +103,7 @@ class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
   }
 
   void _atualizarOpcoes() {
-    final consulta = _normalizar(widget.controller.text.trim());
-    _opcoesFiltradas = consulta.isEmpty
-        ? _paisesOrdenados
-        : _paisesOrdenados.where((p) => _normalizar(p['nome']!).contains(consulta)).toList();
+    _opcoesFiltradas = sugestoesDePais(widget.controller.text);
   }
 
   void _mostrarDropdown() {
@@ -174,14 +192,29 @@ class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
     _overlayEntry = null;
   }
 
-  void _selecionarPais(Map<String, String> pais) {
+  void _preencher(Map<String, String> pais) {
     final nome = pais['nome']!;
     widget.controller.value = TextEditingValue(
       text: nome,
       selection: TextSelection.collapsed(offset: nome.length),
     );
     _removerDropdown();
+  }
+
+  void _selecionarPais(Map<String, String> pais) {
+    _preencher(pais);
     _focusNode.unfocus();
+  }
+
+  /// Enter (ou o botão de ação do teclado) preenche com a primeira sugestão e
+  /// passa o foco para o próximo campo. Sem texto ou sem sugestão, não faz
+  /// nada: o campo continua com o foco e a validação de país vale como sempre.
+  void _aoConfirmar(String texto) {
+    if (texto.trim().isEmpty) return;
+    final sugestoes = sugestoesDePais(texto);
+    if (sugestoes.isEmpty) return;
+    _preencher(sugestoes.first);
+    _focusNode.nextFocus();
   }
 
   @override
@@ -202,6 +235,10 @@ class _PaisAutocompleteFieldState extends State<PaisAutocompleteField> {
         focusNode: _focusNode,
         style: const TextStyle(color: kTextPrimary),
         cursorColor: kPrimary,
+        textInputAction: TextInputAction.next,
+        // Vazio para o Flutter não mover o foco sozinho: quem decide é _aoConfirmar.
+        onEditingComplete: () {},
+        onFieldSubmitted: _aoConfirmar,
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s]'))],
         decoration: const InputDecoration(
           label: LabelObrigatorio('País de Origem da Uva'),
