@@ -104,7 +104,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       paisOrigem: _isVinho ? _paisCtrl.text.trim() : null,
       safra: _isVinho ? int.tryParse(_safraCtrl.text.trim()) : null,
       teorAlcool: _isVinho ? parseTeorAlcool(_teorAlcoolCtrl.text) : null,
-      harmonizacao: _isVinho ? normalizarHarmonizacao(_harmonizacaoCtrl.text) : null,
+      harmonizacao: _isVinho ? harmonizacaoParaEnvio(_harmonizacaoCtrl.text) : null,
       tipoAcessorio: _isVinho ? null : _tipoAcessorioCtrl.text.trim(),
       marca: _isVinho ? null : _marcaCtrl.text.trim(),
       material: _isVinho ? null : _materialCtrl.text.trim(),
@@ -387,7 +387,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
         style: const TextStyle(color: kTextPrimary),
         cursorColor: kPrimary,
         decoration: const InputDecoration(
-          label: LabelObrigatorio('Harmonização'),
+          labelText: 'Harmonização',
           hintText: 'Ex: Carnes vermelhas, queijos',
           prefixIcon: Icon(Icons.restaurant_outlined, color: kTextSecondary, size: 20),
         ),

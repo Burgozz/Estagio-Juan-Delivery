@@ -44,7 +44,7 @@ Future<void> _preencherVinho(
   if (escolherPais) await _escolherPais(tester, 'Arg', 'Argentina');
   await tester.enterText(campo('Safra'), safra);
   await tester.enterText(campo('Teor Alcoólico (%)'), teor);
-  await tester.enterText(campo('Harmonização *'), harmonizacao);
+  await tester.enterText(campo('Harmonização'), harmonizacao);
   await tester.enterText(campo('Preço (R\$) *'), '89.90');
   await tester.enterText(campo('Estoque (unidades) *'), estoque);
 }
@@ -123,7 +123,6 @@ void main() {
     for (final (entrada, mensagem) in [
       ('ab', 'Harmonização deve ter entre 3 e 150 caracteres'),
       (', , .', 'Harmonização deve conter apenas letras e pontuação simples'),
-      ('', 'Informe a harmonização'),
     ]) {
       testWidgets('harmonização "$entrada" é barrada no app', (tester) async {
         final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
@@ -133,14 +132,35 @@ void main() {
           await _salvar(tester);
           await tester.pump(const Duration(seconds: 1));
         });
-        expect(erroNoCampo('Harmonização *', mensagem), findsOneWidget);
+        expect(erroNoCampo('Harmonização', mensagem), findsOneWidget);
         expect(api.requisicoes, isEmpty);
+      });
+    }
+
+    testWidgets('harmonização não tem asterisco de obrigatório', (tester) async {
+      await _abrir(tester);
+      expect(campo('Harmonização'), findsOneWidget);
+      expect(campo('Harmonização *'), findsNothing);
+    });
+
+    for (final vazia in ['', '   ']) {
+      testWidgets('vinho com harmonização "$vazia" é enviado com harmonização null', (tester) async {
+        final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
+        await api.executar(() async {
+          await _abrir(tester);
+          await _preencherVinho(tester, harmonizacao: vazia);
+          await _salvar(tester);
+          await tester.pump(const Duration(seconds: 1));
+        });
+        final corpo = api.corpoJson(api.doMetodo('POST').single);
+        expect(corpo.containsKey('harmonizacao'), isTrue);
+        expect(corpo['harmonizacao'], isNull);
       });
     }
 
     testWidgets('números e símbolos digitados na harmonização são ignorados', (tester) async {
       await _abrir(tester);
-      await tester.enterText(campo('Harmonização *'), 'Queijos 12 meses @');
+      await tester.enterText(campo('Harmonização'), 'Queijos 12 meses @');
       await tester.pump();
       expect(find.widgetWithText(TextFormField, 'Queijos  meses '), findsOneWidget);
     });
@@ -277,7 +297,7 @@ void main() {
         await _abrir(tester);
         await tester.tap(find.text('Acessório'));
         await tester.pumpAndSettle();
-        expect(campo('Harmonização *'), findsNothing);
+        expect(campo('Harmonização'), findsNothing);
         expect(campo('País de Origem da Uva *'), findsNothing);
 
         await tester.enterText(campo('Nome do Produto *'), 'Saca-rolhas');

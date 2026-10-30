@@ -38,15 +38,24 @@ void main() {
       expect(validarHarmonizacao('ab'), isNotNull);
     });
 
-    test('é obrigatória', () {
-      expect(validarHarmonizacao(''), isNotNull);
-      expect(validarHarmonizacao('   '), isNotNull);
-      expect(validarHarmonizacao(null), isNotNull);
+    test('é opcional: vazia ou nula é aceita', () {
+      expect(validarHarmonizacao(''), isNull);
+      expect(validarHarmonizacao('   '), isNull);
+      expect(validarHarmonizacao(null), isNull);
     });
 
     test('limite de 150 caracteres após o trim', () {
       expect(validarHarmonizacao('  ${'a' * 150}  '), isNull);
       expect(validarHarmonizacao('a' * 151), isNotNull);
+    });
+  });
+
+  group('harmonizacaoParaEnvio', () {
+    test('vazia vira null e preenchida é normalizada', () {
+      expect(harmonizacaoParaEnvio(''), isNull);
+      expect(harmonizacaoParaEnvio('   '), isNull);
+      expect(harmonizacaoParaEnvio(null), isNull);
+      expect(harmonizacaoParaEnvio('  Massas   /  risotos '), 'Massas / risotos');
     });
   });
 
