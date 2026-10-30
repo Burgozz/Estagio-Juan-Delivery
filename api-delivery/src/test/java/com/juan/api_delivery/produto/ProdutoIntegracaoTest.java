@@ -11,6 +11,7 @@ import jakarta.validation.constraints.DecimalMin;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
@@ -245,12 +246,41 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(produtoRepository.count()).isZero();
         }
 
+        // Harmonização é opcional: ausente, null, vazia ou só com espaços é salva como null.
         @Test
-        void vinhoSemHarmonizacaoRetorna400NoFormatoErros() throws Exception {
+        void vinhoSemHarmonizacaoECriadoComNull() throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.remove("harmonizacao");
-            postJson("/produtos", corpo).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.erros").isArray());
+            long id = criar(corpo);
+            assertThat(((Vinho) doBanco(id)).getHarmonizacao()).isNull();
+            mockMvc.perform(get("/produtos/" + id)).andExpect(jsonPath("$.harmonizacao").doesNotExist());
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(strings = {"", "   "})
+        void vinhoComHarmonizacaoVaziaECriadoComNull(String harmonizacao) throws Exception {
+            Map<String, Object> corpo = vinho();
+            corpo.put("harmonizacao", harmonizacao);
+            long id = criar(corpo);
+            assertThat(((Vinho) doBanco(id)).getHarmonizacao()).isNull();
+        }
+
+        @Test
+        void harmonizacaoPreenchidaESalvaSemEspacosNasPontas() throws Exception {
+            Map<String, Object> corpo = vinho();
+            corpo.put("harmonizacao", "  Massas / risotos  ");
+            long id = criar(corpo);
+            assertThat(((Vinho) doBanco(id)).getHarmonizacao()).isEqualTo("Massas / risotos");
+        }
+
+        @Test
+        void edicaoPodeApagarAHarmonizacao() throws Exception {
+            long id = criar(vinho());
+            Map<String, Object> corpo = vinho();
+            corpo.put("harmonizacao", "");
+            putJson("/produtos/" + id, corpo).andExpect(status().isOk());
+            assertThat(((Vinho) doBanco(id)).getHarmonizacao()).isNull();
         }
 
         @Test

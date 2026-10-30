@@ -39,8 +39,8 @@ public class ProdutoDTO {
     @DecimalMin(value = "7.0", message = TEOR_ALCOOL_INVALIDO)
     @DecimalMax(value = "20.0", message = TEOR_ALCOOL_INVALIDO)
     private Double teorAlcool;
-    // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
-    // O lookahead exige no mínimo 3 letras (igual ao app), para recusar texto só
+    // Opcional (vinho ou acessório). @Pattern e @Size ignoram null, então só
+    // validam quando a harmonização vem preenchida. O lookahead exige no mínimo 3 letras (igual ao app), para recusar texto só
     // com pontuação, como ", , .".
     @Pattern(
         regexp = "^(?=(?:[^a-zA-ZÀ-ÿ]*[a-zA-ZÀ-ÿ]){3})[a-zA-ZÀ-ÿ\\s,.\\-/]+$",
@@ -73,8 +73,8 @@ public class ProdutoDTO {
         return tipo != TipoProduto.VINHO || teorAlcool != null;
     }
 
-    @AssertTrue(message = "Harmonização é obrigatória para vinhos")
-    public boolean isHarmonizacaoValida() {
-        return tipo != TipoProduto.VINHO || (harmonizacao != null && !harmonizacao.isBlank());
+    /** Aplica trim e troca texto vazio por null, para salvar null no banco e não "". */
+    public void setHarmonizacao(String harmonizacao) {
+        this.harmonizacao = harmonizacao == null || harmonizacao.isBlank() ? null : harmonizacao.trim();
     }
 }
