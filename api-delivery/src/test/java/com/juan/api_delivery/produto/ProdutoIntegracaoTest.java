@@ -5,8 +5,9 @@ import com.juan.api_delivery.pedido.ItemPedido;
 import com.juan.api_delivery.pedido.Pedido;
 import com.juan.api_delivery.pedido.StatusPedido;
 import com.juan.api_delivery.shared.IntegracaoBase;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.juan.api_delivery.shared.validation.SafraValida;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.Map;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -117,15 +120,20 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
     class Limites {
 
         @ParameterizedTest
-        @ValueSource(ints = {1900, 2000, 2025})
+        @ValueSource(ints = {1900, 2000})
         void safraDentroDoLimitePassa(int safra) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("safra", safra);
             criar(corpo);
         }
 
-        // BUG ENCONTRADO: o CLAUDE.md e a entidade Vinho (@Min(1800)) aceitam
-        // safras a partir de 1800, mas ProdutoDTO tem @Min(1900).
+        @Test
+        void safraDoAnoAtualPassa() throws Exception {
+            Map<String, Object> corpo = vinho();
+            corpo.put("safra", Year.now().getValue());
+            criar(corpo);
+        }
+
         @Test
         void safra1800Passa() throws Exception {
             Map<String, Object> corpo = vinho();
@@ -141,49 +149,63 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erros").isArray());
         }
 
-        // BUG ENCONTRADO: ProdutoDTO aceita safra 2026 (@Max(2026)), mas a entidade
-        // Vinho tem @Max(2025). O pedido passa no @Valid e explode na gravação, com
-        // {"erro": "<texto técnico>"} em vez de {"erros": [...]}.
         @Test
-        void safraAcimaDoMaximoRetorna400NoFormatoErros() throws Exception {
+        void safraDepoisDoAnoAtualRetorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = vinho();
-            corpo.put("safra", 2026);
+            corpo.put("safra", Year.now().getValue() + 1);
             postJson("/produtos", corpo).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.erros").isArray());
+                .andExpect(jsonPath("$.erros", hasItem("Safra deve estar entre 1800 e o ano atual")));
+            assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: limites de safra divergentes entre a entidade e o DTO
-        // (Vinho: 1800–2025; ProdutoDTO: 1900–2026).
+        // Entidade e DTO usam a mesma regra (1800 até o ano atual), para o erro
+        // sempre sair no @Valid, no formato {"erros": [...]}.
         @Test
         void limitesDeSafraSaoIguaisNaEntidadeENoDto() throws Exception {
             var safraVinho = Vinho.class.getDeclaredField("safra");
             var safraDto = ProdutoDTO.class.getDeclaredField("safra");
-            assertThat(safraDto.getAnnotation(Max.class).value())
-                .as("@Max de safra: ProdutoDTO x Vinho")
-                .isEqualTo(safraVinho.getAnnotation(Max.class).value());
-            assertThat(safraDto.getAnnotation(Min.class).value())
-                .as("@Min de safra: ProdutoDTO x Vinho")
-                .isEqualTo(safraVinho.getAnnotation(Min.class).value());
+            assertThat(safraVinho.isAnnotationPresent(SafraValida.class)).as("@SafraValida em Vinho.safra").isTrue();
+            assertThat(safraDto.isAnnotationPresent(SafraValida.class)).as("@SafraValida em ProdutoDTO.safra").isTrue();
         }
 
+        // Faixa da Lei nº 7.678/1988: de 7% a 20%, com os dois extremos aceitos.
         @ParameterizedTest
-        @ValueSource(doubles = {0.0, 13.5, 100.0})
+        @ValueSource(doubles = {7.0, 13.5, 20.0})
         void teorAlcoolDentroDoLimitePassa(double teor) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("teorAlcool", teor);
-            criar(corpo);
+            long id = criar(corpo);
+            assertThat(((Vinho) doBanco(id)).getTeorAlcool()).isEqualTo(teor);
         }
 
-        // BUG ENCONTRADO: ProdutoDTO.teorAlcool não tem @DecimalMin/@DecimalMax. A
-        // regra 0–100 só existe na entidade Vinho, e o erro chega fora do padrão.
         @ParameterizedTest
-        @ValueSource(doubles = {-0.1, 100.1})
+        @ValueSource(doubles = {0.0, 6.9, 20.1, 100.0})
         void teorAlcoolForaDoLimiteRetorna400NoFormatoErros(double teor) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("teorAlcool", teor);
             postJson("/produtos", corpo).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.erros").isArray());
+                .andExpect(jsonPath("$.erros", hasItem(TEOR_ALCOOL_INVALIDO)));
             assertThat(produtoRepository.count()).isZero();
+        }
+
+        @ParameterizedTest
+        @ValueSource(doubles = {6.9, 20.1})
+        void edicaoComTeorForaDoLimiteRetorna400(double teor) throws Exception {
+            long id = criar(vinho());
+            Map<String, Object> corpo = vinho();
+            corpo.put("teorAlcool", teor);
+            putJson("/produtos/" + id, corpo).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros", hasItem(TEOR_ALCOOL_INVALIDO)));
+            assertThat(((Vinho) doBanco(id)).getTeorAlcool()).isEqualTo(13.5);
+        }
+
+        @Test
+        void limitesDeTeorSaoIguaisNaEntidadeENoDto() throws Exception {
+            for (var campo : new java.lang.reflect.Field[] {
+                Vinho.class.getDeclaredField("teorAlcool"), ProdutoDTO.class.getDeclaredField("teorAlcool")}) {
+                assertThat(campo.getAnnotation(DecimalMin.class).value()).as("@DecimalMin em " + campo).isEqualTo("7.0");
+                assertThat(campo.getAnnotation(DecimalMax.class).value()).as("@DecimalMax em " + campo).isEqualTo("20.0");
+            }
         }
     }
 
@@ -214,9 +236,6 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: o @Pattern de ProdutoDTO.harmonizacao aceita texto só com
-        // pontuação (", , ." tem 5 caracteres permitidos). O Flutter exige ao menos
-        // 3 letras, o backend não.
         @Test
         void harmonizacaoSoComPontuacaoRetorna400() throws Exception {
             Map<String, Object> corpo = vinho();
@@ -226,8 +245,6 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(produtoRepository.count()).isZero();
         }
 
-        // BUG ENCONTRADO: ProdutoDTO não exige harmonização para vinho; quem barra é o
-        // @NotBlank da entidade, com erro fora do padrão {"erros": [...]}.
         @Test
         void vinhoSemHarmonizacaoRetorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = vinho();
@@ -318,7 +335,7 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
         void deletarProdutoComPedidosRetorna400EMantemNoBanco() throws Exception {
             long id = criar(vinho());
             Pedido pedido = pedidoRepository.save(Pedido.builder()
-                .usuario(usuarioRepository.findByEmail("admin@juan.com").orElseThrow())
+                .usuario(usuarioRepository.findByEmailIgnoreCase("admin@juan.com").orElseThrow())
                 .status(StatusPedido.ENTREGUE)
                 .dataPedido(LocalDateTime.now())
                 .valorTotal(new BigDecimal("89.90"))

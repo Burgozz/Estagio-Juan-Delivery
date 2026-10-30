@@ -136,6 +136,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   },
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Informe o nome';
+                    final tamanho = v.trim().length;
+                    if (tamanho < 2 || tamanho > 100) return 'Nome deve ter entre 2 e 100 caracteres';
                     if (!RegExp(r'^[a-zA-ZÀ-ÿ ]+$').hasMatch(v)) {
                       return 'Nome deve conter apenas letras';
                     }
@@ -232,6 +234,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   },
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Informe a senha';
+                    if (v.length < 6) return 'Senha deve ter no mínimo 6 caracteres';
                     if (_senhaApiError != null) return _senhaApiError;
                     return null;
                   },

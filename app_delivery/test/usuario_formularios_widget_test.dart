@@ -151,9 +151,6 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
     });
 
-    // BUG ENCONTRADO: o cadastro não valida o tamanho mínimo da senha (6) nem do
-    // nome (2) no app. O pedido vai para o backend, que hoje responde com um texto
-    // técnico do Hibernate (ver bug do UsuarioDTO).
     testWidgets('senha com menos de 6 caracteres é barrada no app', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
@@ -165,7 +162,6 @@ void main() {
       expect(find.descendant(of: campo('Senha'), matching: find.textContaining('6')), findsOneWidget);
     });
 
-    // BUG ENCONTRADO: idem para nome com 1 letra.
     testWidgets('nome com 1 letra é barrado no app', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
@@ -263,9 +259,6 @@ void main() {
       expect(corpo['telefone'], '4333334444');
     });
 
-    // BUG ENCONTRADO (no caso "domínio de e-mail inexistente"): usuario_form_screen.dart
-    // só procura "email" na mensagem; o texto do backend é "Domínio de e-mail ...",
-    // com hífen, então o erro vai para um SnackBar em vez de ficar embaixo do campo.
     for (final (descricao, corpo, campoDe, msg) in _errosDaApi) {
       testWidgets('erro da API ($descricao) aparece inline no campo certo', (tester) async {
         final api = ApiFalsa((_) => respostaJson(corpo, 400));

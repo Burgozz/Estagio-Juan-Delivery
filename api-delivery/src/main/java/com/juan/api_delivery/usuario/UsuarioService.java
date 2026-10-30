@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static com.juan.api_delivery.shared.exception.MensagensErro.EMAIL_JA_CADASTRADO;
@@ -36,12 +37,14 @@ public class UsuarioService {
     }
 
     public Usuario criar(UsuarioDTO dto) {
-        Optional<Usuario> existente = repository.findByEmail(dto.getEmail());
+        String email = normalizarEmail(dto.getEmail());
+        Optional<Usuario> existente = repository.findByEmailIgnoreCase(email);
         if (existente.isPresent()) {
             Usuario usuario = existente.get();
             if (usuario.isAtivo()) {
                 throw new IllegalArgumentException(EMAIL_JA_CADASTRADO);
             }
+            usuario.setEmail(email);
             usuario.setNome(dto.getNome());
             usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
             usuario.setSenha(dto.getSenha());
@@ -52,28 +55,29 @@ public class UsuarioService {
             return repository.save(usuario);
         }
         Usuario usuario = Usuario.builder()
-        .nome(dto.getNome())
-        .cpf(CpfValidator.somenteDigitos(dto.getCpf()))
-        .email(dto.getEmail())
-        .senha(dto.getSenha())
-        .telefone(dto.getTelefone())
-        .dataCadastro(LocalDate.now())
-        .perfil(PerfilUsuario.CLIENTE)
-        .build();
-    return repository.save(usuario);
+            .nome(dto.getNome())
+            .cpf(CpfValidator.somenteDigitos(dto.getCpf()))
+            .email(email)
+            .senha(dto.getSenha())
+            .telefone(dto.getTelefone())
+            .dataCadastro(LocalDate.now())
+            .perfil(PerfilUsuario.CLIENTE)
+            .build();
+        return repository.save(usuario);
     }
 
     public Usuario atualizar(Long id, UsuarioDTO dto) {
         Usuario usuario = buscarPorId(id);
-    repository.findByEmail(dto.getEmail())
-        .filter(u -> !u.getId().equals(id))
-        .ifPresent(u -> { throw new IllegalArgumentException(EMAIL_JA_CADASTRADO); });
-    usuario.setNome(dto.getNome());
-    usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
-    usuario.setEmail(dto.getEmail());
-    usuario.setSenha(dto.getSenha());
-    usuario.setTelefone(dto.getTelefone());
-    return repository.save(usuario);
+        String email = normalizarEmail(dto.getEmail());
+        repository.findByEmailIgnoreCase(email)
+            .filter(u -> !u.getId().equals(id))
+            .ifPresent(u -> { throw new IllegalArgumentException(EMAIL_JA_CADASTRADO); });
+        usuario.setNome(dto.getNome());
+        usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
+        usuario.setEmail(email);
+        usuario.setSenha(dto.getSenha());
+        usuario.setTelefone(dto.getTelefone());
+        return repository.save(usuario);
     }
 
     public void deletar(Long id) {
@@ -83,12 +87,17 @@ public class UsuarioService {
     }
 
     public Usuario login(String email, String senha) {
-        Usuario usuario = repository.findByEmail(email)
+        Usuario usuario = repository.findByEmailIgnoreCase(normalizarEmail(email))
             .filter(Usuario::isAtivo)
             .orElseThrow(CredenciaisInvalidasException::new);
         if (!usuario.getSenha().equals(senha)) {
             throw new CredenciaisInvalidasException();
         }
         return usuario;
+    }
+
+    /** E-mail é gravado e comparado sem espaços nas pontas e em minúsculas. */
+    private static String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 }

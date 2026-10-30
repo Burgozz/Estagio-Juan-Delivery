@@ -2,9 +2,10 @@ package com.juan.api_delivery.produto;
 
 import java.math.BigDecimal;
 
+import com.juan.api_delivery.shared.validation.SafraValida;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import static com.juan.api_delivery.shared.exception.MensagensErro.ESTOQUE_NEGATIVO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
 
 @Data
 @NoArgsConstructor
@@ -32,12 +34,18 @@ public class ProdutoDTO {
     // Campos específicos de Vinho
     private CategoriaProduto categoria;
     private String paisOrigem;
-    @Min(value = 1900, message = "Safra deve ser a partir de 1900")
-    @Max(value = 2026, message = "Safra não pode ser maior que o ano atual")
+    @SafraValida
     private Integer safra;
+    @DecimalMin(value = "7.0", message = TEOR_ALCOOL_INVALIDO)
+    @DecimalMax(value = "20.0", message = TEOR_ALCOOL_INVALIDO)
     private Double teorAlcool;
     // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
-    @Pattern(regexp = "^[a-zA-ZÀ-ÿ\\s,.\\-/]+$", message = "Harmonização deve conter apenas letras e pontuação simples")
+    // O lookahead exige no mínimo 3 letras (igual ao app), para recusar texto só
+    // com pontuação, como ", , .".
+    @Pattern(
+        regexp = "^(?=(?:[^a-zA-ZÀ-ÿ]*[a-zA-ZÀ-ÿ]){3})[a-zA-ZÀ-ÿ\\s,.\\-/]+$",
+        message = "Harmonização deve conter apenas letras e pontuação simples"
+    )
     @Size(min = 3, max = 150, message = "Harmonização deve ter entre 3 e 150 caracteres")
     private String harmonizacao;
 
@@ -63,5 +71,10 @@ public class ProdutoDTO {
     @AssertTrue(message = "Teor alcoólico é obrigatório para vinhos")
     public boolean isTeorAlcoolValido() {
         return tipo != TipoProduto.VINHO || teorAlcool != null;
+    }
+
+    @AssertTrue(message = "Harmonização é obrigatória para vinhos")
+    public boolean isHarmonizacaoValida() {
+        return tipo != TipoProduto.VINHO || (harmonizacao != null && !harmonizacao.isBlank());
     }
 }

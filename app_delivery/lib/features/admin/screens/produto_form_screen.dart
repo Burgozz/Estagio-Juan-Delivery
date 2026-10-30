@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../catalogo/models/produto.dart';
 import '../../catalogo/services/produto_service.dart';
 import '../../../core/utils/harmonizacao_validator.dart';
+import '../../../core/utils/teor_alcool_validator.dart';
 import '../widgets/pais_autocomplete_field.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
 import '../../../core/theme/app_colors.dart';
@@ -102,7 +103,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       categoria: _isVinho ? _categoriaSelecionada : null,
       paisOrigem: _isVinho ? _paisCtrl.text.trim() : null,
       safra: _isVinho ? int.tryParse(_safraCtrl.text.trim()) : null,
-      teorAlcool: _isVinho ? double.tryParse(_teorAlcoolCtrl.text.trim()) : null,
+      teorAlcool: _isVinho ? parseTeorAlcool(_teorAlcoolCtrl.text) : null,
       harmonizacao: _isVinho ? normalizarHarmonizacao(_harmonizacaoCtrl.text) : null,
       tipoAcessorio: _isVinho ? null : _tipoAcessorioCtrl.text.trim(),
       marca: _isVinho ? null : _marcaCtrl.text.trim(),
@@ -345,8 +346,10 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
                 }
                 final ano = int.tryParse(v);
                 if (ano == null) return 'Ano inválido';
-                if (ano < 1900 || ano > 2026) {
-                  return 'Safra deve ser entre 1900 e 2026';
+                // Mesma regra do backend (@SafraValida): 1800 até o ano atual.
+                final anoAtual = DateTime.now().year;
+                if (ano < 1800 || ano > anoAtual) {
+                  return 'Safra deve ser entre 1800 e $anoAtual';
                 }
                 return _safraApiError;
               },
@@ -372,8 +375,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
               },
               validator: (v) {
                 if (v == null || v.isEmpty) return _teorAlcoolApiError;
-                if (double.tryParse(v.trim()) == null) return 'Valor inválido';
-                return _teorAlcoolApiError;
+                return validarTeorAlcool(v) ?? _teorAlcoolApiError;
               },
             ),
           ),

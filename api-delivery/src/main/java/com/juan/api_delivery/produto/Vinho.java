@@ -1,13 +1,12 @@
 package com.juan.api_delivery.produto;
 
+import com.juan.api_delivery.shared.validation.SafraValida;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import static com.juan.api_delivery.shared.exception.MensagensErro.SAFRA_INVALIDA;
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
 
 @Entity
 @DiscriminatorValue("VINHO")
@@ -34,12 +33,11 @@ public class Vinho extends Produto {
     @NotBlank
     private String paisOrigem;
 
-    @Min(value = 1800, message = SAFRA_INVALIDA)
-    @Max(value = 2025, message = SAFRA_INVALIDA)
+    @SafraValida
     private int safra;
 
-    @DecimalMin(value = "0.0", message = "Teor alcoólico não pode ser negativo")
-    @DecimalMax(value = "100.0", message = "Teor alcoólico inválido")
+    @DecimalMin(value = "7.0", message = TEOR_ALCOOL_INVALIDO)
+    @DecimalMax(value = "20.0", message = TEOR_ALCOOL_INVALIDO)
     private double teorAlcool;
 
     @NotBlank

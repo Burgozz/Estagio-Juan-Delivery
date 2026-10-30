@@ -46,8 +46,9 @@ public class Usuario {
     @Column(unique = true)
     private String email;
 
+    // O tamanho mínimo (6) é validado no UsuarioDTO. Aqui não, porque o admin
+    // padrão criado pelo DataInitializer tem a senha "admin" (5 caracteres).
     @NotBlank
-    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
     private String senha;
 
     @Pattern(regexp = "\\d{10,11}", message = "Telefone deve conter 10 ou 11 dígitos numéricos")

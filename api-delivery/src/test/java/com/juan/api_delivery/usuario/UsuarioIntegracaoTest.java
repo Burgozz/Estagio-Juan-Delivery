@@ -59,7 +59,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("mascara@teste.com", "111.444.777-35"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.cpf").value("11144477735"));
-            assertThat(usuarioRepository.findByEmail("mascara@teste.com").orElseThrow().getCpf())
+            assertThat(usuarioRepository.findByEmailIgnoreCase("mascara@teste.com").orElseThrow().getCpf())
                 .isEqualTo("11144477735");
         }
 
@@ -81,12 +81,9 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("invalido@teste.com", cpf))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.erros", hasItem("CPF inválido")));
-            assertThat(usuarioRepository.findByEmail("invalido@teste.com")).isEmpty();
+            assertThat(usuarioRepository.findByEmailIgnoreCase("invalido@teste.com")).isEmpty();
         }
 
-        // BUG ENCONTRADO: CpfValidator.somenteDigitos remove QUALQUER caractere que
-        // não seja dígito (não só a máscara), então letras no meio de um CPF válido
-        // são descartadas e o cadastro é aceito.
         @ParameterizedTest
         @ValueSource(strings = {"111a444b777c35", "CPF11144477735"})
         void cpfComLetrasMisturadasRetorna400(String cpf) throws Exception {
@@ -116,7 +113,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", usuario("maria@dominioquenaoexiste123456.com", "11144477735"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.erros", hasItem(containsString("e-mail"))));
-            assertThat(usuarioRepository.findByEmail("maria@dominioquenaoexiste123456.com")).isEmpty();
+            assertThat(usuarioRepository.findByEmailIgnoreCase("maria@dominioquenaoexiste123456.com")).isEmpty();
         }
 
         @ParameterizedTest
@@ -161,14 +158,21 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .filter(u -> "dup@teste.com".equals(u.getEmail())).count()).isEqualTo(1);
         }
 
-        // BUG ENCONTRADO: a verificação de e-mail duplicado (findByEmail) diferencia
-        // maiúsculas de minúsculas, então "Dup@Teste.com" vira uma segunda conta
-        // para a mesma caixa de e-mail.
         @Test
         void emailDuplicadoComMaiusculasDiferentesTambemEBloqueado() throws Exception {
             postJson("/usuarios", usuario("caixa@teste.com", "11144477735")).andExpect(status().isCreated());
             postJson("/usuarios", usuario("Caixa@Teste.com", "52998224725"))
                 .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void emailEGravadoEmMinusculasELoginIgnoraMaiusculas() throws Exception {
+            postJson("/usuarios", usuario("Misto@Teste.com", "11144477735")).andExpect(status().isCreated());
+            assertThat(usuarioRepository.findAll().stream().map(Usuario::getEmail))
+                .contains("misto@teste.com")
+                .doesNotContain("Misto@Teste.com");
+            postJson("/auth/login", Map.of("email", "MISTO@teste.com", "senha", "123456"))
+                .andExpect(status().isOk());
         }
 
         @Test
@@ -180,8 +184,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erro").value("Email já cadastrado"));
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.email não tem @NotBlank, então é possível
-        // criar usuário sem e-mail (e ele nunca conseguirá fazer login).
         @Test
         void emailAusenteRetorna400() throws Exception {
             Map<String, Object> corpo = usuario(null, "11144477735");
@@ -251,10 +253,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", corpo).andExpect(status().isCreated());
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.nome não tem @Size(min = 2, max = 100). A regra
-        // só existe na entidade Usuario, então o erro sai como {"erro": "<texto técnico
-        // do Hibernate Validator>"} em vez de {"erros": ["Nome deve ter entre 2 e 100
-        // caracteres"]}.
         @ParameterizedTest
         @ValueSource(ints = {1, 101})
         void nomeForaDoLimiteRetorna400NoFormatoErros(int tamanho) throws Exception {
@@ -272,8 +270,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
             postJson("/usuarios", corpo).andExpect(status().isCreated());
         }
 
-        // BUG ENCONTRADO: UsuarioDTO.senha não tem @Size(min = 6). Mesmo problema do
-        // nome: a regra só existe na entidade e o erro chega fora do padrão.
         @Test
         void senhaComMenosDe6Retorna400NoFormatoErros() throws Exception {
             Map<String, Object> corpo = usuario("senha5@teste.com", "11144477735");
@@ -283,9 +279,6 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.erros", hasItem("Senha deve ter no mínimo 6 caracteres")));
         }
 
-        // BUG ENCONTRADO: na edição a validação da entidade só roda no commit, e o
-        // erro vira {"erro": "Could not commit JPA transaction"} (ou similar),
-        // sem dizer qual campo está errado.
         @Test
         void edicaoComSenhaCurtaRetorna400NoFormatoErros() throws Exception {
             JsonNode criado = corpoDe(postJson("/usuarios", usuario("edita@teste.com", "11144477735")));
@@ -313,7 +306,7 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.ativo").value(true))
                 .andExpect(jsonPath("$.dataCadastro").value(LocalDate.now().toString()));
 
-            Usuario salvo = usuarioRepository.findByEmail("novo@teste.com").orElseThrow();
+            Usuario salvo = usuarioRepository.findByEmailIgnoreCase("novo@teste.com").orElseThrow();
             assertThat(salvo.getPerfil()).isEqualTo(PerfilUsuario.CLIENTE);
             assertThat(salvo.isAtivo()).isTrue();
             assertThat(salvo.getDataCadastro()).isEqualTo(LocalDate.now());
