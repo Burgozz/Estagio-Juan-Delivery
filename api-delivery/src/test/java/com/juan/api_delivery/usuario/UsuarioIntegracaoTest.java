@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -357,15 +358,49 @@ class UsuarioIntegracaoTest extends IntegracaoBase {
         }
 
         @Test
-        void recadastroComEmailDeContaInativaReativaAMesmaConta() throws Exception {
+        void cadastroComEmailDeContaInativaERecusadoSemMexerNosDados() throws Exception {
             Usuario inativo = salvarDireto("volta@teste.com", false);
-            postJson("/usuarios", usuario("volta@teste.com", "52998224725"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(inativo.getId()))
-                .andExpect(jsonPath("$.ativo").value(true))
-                .andExpect(jsonPath("$.perfil").value("CLIENTE"));
+            postJson("/usuarios", usuario("VOLTA@teste.com", "52998224725"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Email já cadastrado"));
+
+            Usuario noBanco = usuarioRepository.findById(inativo.getId()).orElseThrow();
+            assertThat(noBanco.isAtivo()).isFalse();
+            assertThat(noBanco.getNome()).isEqualTo("Direto");
+            assertThat(noBanco.getCpf()).isEqualTo("11144477735");
+            assertThat(noBanco.getSenha()).isEqualTo("123456");
+            assertThat(noBanco.getTelefone()).isEqualTo("4333334444");
+            assertThat(noBanco.getDataCadastro()).isEqualTo(inativo.getDataCadastro());
             assertThat(usuarioRepository.findAll().stream()
                 .filter(u -> "volta@teste.com".equals(u.getEmail())).count()).isEqualTo(1);
+        }
+
+        @Test
+        void reativarUsuarioInativoRetorna200EAtivaAConta() throws Exception {
+            Usuario inativo = salvarDireto("reativar@teste.com", false);
+            mockMvc.perform(patch("/usuarios/" + inativo.getId() + "/reativar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(inativo.getId()))
+                .andExpect(jsonPath("$.ativo").value(true))
+                .andExpect(jsonPath("$.nome").value("Direto"));
+            assertThat(usuarioRepository.findById(inativo.getId()).orElseThrow().isAtivo()).isTrue();
+            postJson("/auth/login", Map.of("email", "reativar@teste.com", "senha", "123456"))
+                .andExpect(status().isOk()); // volta a conseguir entrar
+        }
+
+        @Test
+        void reativarUsuarioAtivoRetorna400() throws Exception {
+            Usuario ativo = salvarDireto("jaativo@teste.com", true);
+            mockMvc.perform(patch("/usuarios/" + ativo.getId() + "/reativar"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Usuário já está ativo"));
+        }
+
+        @Test
+        void reativarUsuarioInexistenteRetorna400() throws Exception {
+            mockMvc.perform(patch("/usuarios/999999/reativar"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Usuário não encontrado"));
         }
 
         @Test

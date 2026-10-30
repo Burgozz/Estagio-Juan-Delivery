@@ -8,6 +8,7 @@ package com.juan.api_delivery.shared.exception;
 public final class MensagensErro {
 
     public static final String USUARIO_NAO_ENCONTRADO = "Usuário não encontrado";
+    public static final String USUARIO_JA_ATIVO = "Usuário já está ativo";
     public static final String PRODUTO_NAO_ENCONTRADO = "Produto não encontrado";
     public static final String PEDIDO_NAO_ENCONTRADO = "Pedido não encontrado";
     public static final String EMAIL_JA_CADASTRADO = "Email já cadastrado";

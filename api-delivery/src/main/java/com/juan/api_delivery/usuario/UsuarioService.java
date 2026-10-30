@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 import static com.juan.api_delivery.shared.exception.MensagensErro.EMAIL_JA_CADASTRADO;
+import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_JA_ATIVO;
 import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
 
 @Service
@@ -38,21 +38,10 @@ public class UsuarioService {
 
     public Usuario criar(UsuarioDTO dto) {
         String email = normalizarEmail(dto.getEmail());
-        Optional<Usuario> existente = repository.findByEmailIgnoreCase(email);
-        if (existente.isPresent()) {
-            Usuario usuario = existente.get();
-            if (usuario.isAtivo()) {
-                throw new IllegalArgumentException(EMAIL_JA_CADASTRADO);
-            }
-            usuario.setEmail(email);
-            usuario.setNome(dto.getNome());
-            usuario.setCpf(CpfValidator.somenteDigitos(dto.getCpf()));
-            usuario.setSenha(dto.getSenha());
-            usuario.setTelefone(dto.getTelefone());
-            usuario.setDataCadastro(LocalDate.now());
-            usuario.setAtivo(true);
-            usuario.setPerfil(PerfilUsuario.CLIENTE);
-            return repository.save(usuario);
+        // Vale também para conta inativa: ela só volta pelo PATCH /usuarios/{id}/reativar
+        // do admin, nunca por um novo cadastro que sobrescreveria os dados dela.
+        if (repository.findByEmailIgnoreCase(email).isPresent()) {
+            throw new IllegalArgumentException(EMAIL_JA_CADASTRADO);
         }
         Usuario usuario = Usuario.builder()
             .nome(dto.getNome())
@@ -77,6 +66,16 @@ public class UsuarioService {
         usuario.setEmail(email);
         usuario.setSenha(dto.getSenha());
         usuario.setTelefone(dto.getTelefone());
+        return repository.save(usuario);
+    }
+
+    /** Reativa um usuário excluído (inativo). Usado pela tela de administração. */
+    public Usuario reativar(Long id) {
+        Usuario usuario = buscarPorId(id);
+        if (usuario.isAtivo()) {
+            throw new IllegalArgumentException(USUARIO_JA_ATIVO);
+        }
+        usuario.setAtivo(true);
         return repository.save(usuario);
     }
 
