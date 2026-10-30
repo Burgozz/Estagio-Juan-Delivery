@@ -65,4 +65,29 @@ public abstract class Produto {
     @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean ativo = true;
+
+    /**
+     * Mantém "ativo" coerente com o estoque: estoque 0 desativa o produto e
+     * estoque maior que 0 reativa. Usado no cadastro/edição pelo admin e em
+     * toda baixa ou devolução de estoque feita pelos pedidos.
+     */
+    public void atualizarAtivoConformeEstoque() {
+        if (estoque != null && estoque == 0) {
+            ativo = false;
+        } else if (estoque != null && estoque > 0) {
+            ativo = true;
+        }
+    }
+
+    /** Retira [quantidade] do estoque (já validada pelo chamador) e aplica a regra de ativo. */
+    public void baixarEstoque(int quantidade) {
+        estoque = (estoque == null ? 0 : estoque) - quantidade;
+        atualizarAtivoConformeEstoque();
+    }
+
+    /** Devolve [quantidade] ao estoque e aplica a regra de ativo (reativa se voltou a ter estoque). */
+    public void devolverEstoque(int quantidade) {
+        estoque = (estoque == null ? 0 : estoque) + quantidade;
+        atualizarAtivoConformeEstoque();
+    }
 }

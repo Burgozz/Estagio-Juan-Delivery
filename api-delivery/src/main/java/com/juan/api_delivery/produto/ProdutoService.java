@@ -52,7 +52,7 @@ public class ProdutoService {
         }
         validarCamposPorTipo(dto);
         Produto produto = construirNovoProduto(dto);
-        atualizarAtivoConformeEstoque(produto);
+        produto.atualizarAtivoConformeEstoque();
         return repository.save(produto);
     }
 
@@ -74,22 +74,8 @@ public class ProdutoService {
             acessorio.setMarca(dto.getMarca());
             acessorio.setMaterial(dto.getMaterial());
         }
-        atualizarAtivoConformeEstoque(produto);
+        produto.atualizarAtivoConformeEstoque();
         return repository.save(produto);
-    }
-
-    /**
-     * Desativa automaticamente o produto quando o estoque zera e o
-     * reativa automaticamente quando volta a ter estoque, mantendo o
-     * campo "ativo" sempre coerente com o estoque atual.
-     */
-    private void atualizarAtivoConformeEstoque(Produto produto) {
-        Integer estoque = produto.getEstoque();
-        if (estoque != null && estoque == 0) {
-            produto.setAtivo(false);
-        } else if (estoque != null && estoque > 0 && !produto.isAtivo()) {
-            produto.setAtivo(true);
-        }
     }
 
     /**

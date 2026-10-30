@@ -3,7 +3,9 @@ package com.juan.api_delivery.produto;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,15 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findByAtivoTrue();
 
     Optional<Produto> findByIdAndAtivoTrue(Long id);
+
+    /**
+     * Busca o produto travando a linha até o fim da transação (SELECT ... FOR
+     * UPDATE). Usado ao baixar ou devolver estoque, para dois pedidos ao mesmo
+     * tempo não venderem a mesma unidade.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Produto p WHERE p.id = :id")
+    Optional<Produto> findByIdParaAtualizarEstoque(@Param("id") Long id);
 
     /**
      * "categoria" é um campo específico de {@link Vinho}, então a filtragem

@@ -1,5 +1,6 @@
 package com.juan.api_delivery.pedido;
 
+import com.juan.api_delivery.produto.ProdutoRepository;
 import com.juan.api_delivery.usuario.Usuario;
 import com.juan.api_delivery.usuario.UsuarioRepository;
 import java.math.BigDecimal;
@@ -7,9 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_CANCELADO_NAO_ALTERA;
 import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_NAO_ENCONTRADO;
 import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
 
@@ -19,6 +22,8 @@ public class PedidoService {
 
     private final PedidoRepository repository;
     private final UsuarioRepository usuarioRepository;
+    private final ItemPedidoRepository itemPedidoRepository;
+    private final ProdutoRepository produtoRepository;
 
     public List<Pedido> listarTodos() {
         return repository.findAll();
@@ -45,8 +50,27 @@ public class PedidoService {
         return repository.save(pedido);
     }
 
+    /**
+     * Ao cancelar, devolve ao estoque a quantidade de todos os itens
+     * (reativando os produtos que voltarem a ter estoque). Cancelar de novo
+     * não devolve outra vez, e um pedido cancelado não volta a outro status,
+     * porque o estoque dele já foi devolvido.
+     */
+    @Transactional
     public Pedido atualizarStatus(Long id, StatusPedido status) {
         Pedido pedido = buscarPorId(id);
+        if (pedido.getStatus() == StatusPedido.CANCELADO) {
+            if (status == StatusPedido.CANCELADO) {
+                return pedido;
+            }
+            throw new IllegalArgumentException(PEDIDO_CANCELADO_NAO_ALTERA);
+        }
+        if (status == StatusPedido.CANCELADO) {
+            for (ItemPedido item : itemPedidoRepository.findByPedidoId(id)) {
+                produtoRepository.findByIdParaAtualizarEstoque(item.getProduto().getId())
+                    .ifPresent(produto -> produto.devolverEstoque(item.getQuantidade()));
+            }
+        }
         pedido.setStatus(status);
         return repository.save(pedido);
     }
