@@ -35,6 +35,26 @@ Future<void> _abrirDetalhe(WidgetTester tester, Map<String, dynamic> produto) as
 }
 
 void main() {
+  setUp(CarrinhoController.instance.limpar);
+
+  testWidgets('adicionar ao carrinho para no estoque disponível', (tester) async {
+    await _abrirDetalhe(tester, {..._vinho(harmonizacao: 'Carnes vermelhas'), 'estoque': 2});
+    final adicionar = find.widgetWithText(ElevatedButton, 'ADICIONAR AO CARRINHO');
+    await tester.tap(adicionar);
+    await tester.pump();
+    await tester.tap(adicionar);
+    await tester.pump();
+    expect(CarrinhoController.instance.itens.single.quantidade, 2);
+    expect(find.text('No carrinho: 2 de 2 disponível(is)'), findsOneWidget);
+
+    final botao = find.widgetWithText(ElevatedButton, 'ESTOQUE MÁXIMO NO CARRINHO');
+    expect(tester.widget<ElevatedButton>(botao).onPressed, isNull);
+    await tester.tap(botao);
+    await tester.pump();
+    expect(CarrinhoController.instance.itens.single.quantidade, 2);
+    await tester.pump(const Duration(seconds: 3)); // deixa o SnackBar sair
+  });
+
   testWidgets('vinho com harmonização mostra a seção', (tester) async {
     await _abrirDetalhe(tester, _vinho(harmonizacao: 'Carnes vermelhas'));
     expect(find.text('Harmonização: '), findsOneWidget);

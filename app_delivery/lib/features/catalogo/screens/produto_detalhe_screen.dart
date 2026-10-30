@@ -50,7 +50,7 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
   }
 
   void _adicionarAoCarrinho(Produto produto) {
-    context.read<CarrinhoController>().adicionar(produto);
+    if (!context.read<CarrinhoController>().adicionar(produto)) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Produto adicionado ao carrinho!'),
@@ -151,14 +151,7 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _adicionarAoCarrinho(p),
-              icon: const Icon(Icons.shopping_cart_outlined),
-              label: const Text('ADICIONAR AO CARRINHO'),
-            ),
-          ),
+          _BotaoAdicionar(produto: p, onAdicionar: () => _adicionarAoCarrinho(p)),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -268,6 +261,40 @@ class _ErroView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Botão de adicionar ao carrinho. Fica desabilitado quando o carrinho já tem
+/// todo o estoque disponível do produto, para a quantidade não passar dele.
+class _BotaoAdicionar extends StatelessWidget {
+  final Produto produto;
+  final VoidCallback onAdicionar;
+
+  const _BotaoAdicionar({required this.produto, required this.onAdicionar});
+
+  @override
+  Widget build(BuildContext context) {
+    final carrinho = context.watch<CarrinhoController>();
+    final pode = carrinho.podeAdicionar(produto);
+    final noCarrinho = carrinho.quantidadeDe(produto);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton.icon(
+          onPressed: pode ? onAdicionar : null,
+          icon: const Icon(Icons.shopping_cart_outlined),
+          label: Text(pode ? 'ADICIONAR AO CARRINHO' : 'ESTOQUE MÁXIMO NO CARRINHO'),
+        ),
+        if (noCarrinho > 0) ...[
+          const SizedBox(height: 6),
+          Text(
+            'No carrinho: $noCarrinho de ${produto.estoque} disponível(is)',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: kTextSecondary, fontSize: 12),
+          ),
+        ],
+      ],
     );
   }
 }

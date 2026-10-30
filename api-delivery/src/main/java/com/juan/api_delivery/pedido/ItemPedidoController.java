@@ -34,8 +34,8 @@ public class ItemPedidoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
-        service.remover(id);
+    public ResponseEntity<Void> remover(@PathVariable Long pedidoId, @PathVariable Long id) {
+        service.remover(pedidoId, id);
         return ResponseEntity.noContent().build();
     }
 }
