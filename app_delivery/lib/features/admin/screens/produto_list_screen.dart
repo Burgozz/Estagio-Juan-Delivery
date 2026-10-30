@@ -10,6 +10,7 @@ import '../widgets/painel_filtros.dart';
 import '../widgets/resultados_header.dart';
 import '../widgets/status_chips.dart';
 import 'produto_form_screen.dart';
+import '../../../core/session/logout.dart';
 import '../../../core/theme/app_colors.dart';
 
 class ProdutoListScreen extends StatefulWidget {
@@ -242,7 +243,7 @@ class _ProdutoListScreenState extends State<ProdutoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PRODUTOS')),
+      appBar: AppBar(title: const Text('PRODUTOS'), actions: const [BotaoSair()]),
       floatingActionButton: FloatingActionButton(
         backgroundColor: kPrimary,
         child: const Icon(Icons.add, color: Colors.white),

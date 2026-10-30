@@ -9,6 +9,7 @@ import '../widgets/painel_filtros.dart';
 import '../widgets/resultados_header.dart';
 import '../widgets/status_chips.dart';
 import 'usuario_form_screen.dart';
+import '../../../core/session/logout.dart';
 import '../../../core/theme/app_colors.dart';
 
 class UsuarioListScreen extends StatefulWidget {
@@ -202,7 +203,7 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('JUAN DELIVERY')),
+      appBar: AppBar(title: const Text('JUAN DELIVERY'), actions: const [BotaoSair()]),
       floatingActionButton: FloatingActionButton(
         backgroundColor: kPrimary,
         child: const Icon(Icons.add, color: Colors.white),
