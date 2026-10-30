@@ -135,6 +135,7 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 ## Endpoints Principais
 - `POST /auth/login` → autenticação
 - `GET/POST/PUT/DELETE /usuarios`
+- `PATCH /usuarios/{id}/reativar` → reativa usuário inativo (só admin); já ativo → 400 "Usuário já está ativo"
 - `GET/POST/PUT/DELETE /produtos`
 - `GET /produtos/admin` → todos incluindo inativos (só admin)
 - `GET /produtos?categoria={}` → filtro por categoria
@@ -160,6 +161,7 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 - Safra: entre 1800 e o ano atual (`@SafraValida`, calculado com `Year.now()`)
 - Teor alcoólico: entre 7.0 e 20.0 (Lei nº 7.678/1988)
 - Harmonização: opcional; se preenchida, só letras e pontuação simples, mínimo 3 letras (vazia é salva como null)
-- Email único por usuário
+- Email único por usuário, inclusive contra contas inativas: cadastrar com o e-mail de um inativo dá
+  "Email já cadastrado" (não reativa nem sobrescreve; só o admin reativa)
 - Todos os novos usuários criados via cadastro recebem perfil CLIENTE
 - Admin padrão: email `admin@juan.com`, senha `admin`

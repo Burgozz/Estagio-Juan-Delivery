@@ -148,6 +148,57 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
     }
   }
 
+  Future<void> _reativar(int id, String nome) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          'Reativar "$nome"',
+          style: const TextStyle(color: kPrimary, fontWeight: FontWeight.w600),
+        ),
+        content: const Text(
+          'Deseja reativar este usuário?',
+          style: TextStyle(color: kTextPrimary),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: kTextSecondary),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: kPrimary),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Reativar', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true || !mounted) return;
+    final mensageiro = ScaffoldMessenger.of(context);
+    try {
+      await service.reativar(id);
+      mensageiro.showSnackBar(
+        SnackBar(
+          content: Text('Usuário "$nome" reativado com sucesso'),
+          backgroundColor: Colors.green.shade700,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      mensageiro.showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red.shade700,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+    _carregar();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -296,8 +347,10 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
               ),
             ),
           ),
+          // No inativo, o espaço fica reservado para o botão "Reativar", que é
+          // desenhado por cima do card (fora da opacidade de 50%).
           trailing: inativo
-              ? null
+              ? const SizedBox(width: 110)
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -328,6 +381,16 @@ class _UsuarioListScreenState extends State<UsuarioListScreen> {
     return Stack(
       children: [
         Opacity(opacity: 0.5, child: card),
+        Positioned(
+          right: 12,
+          bottom: 22,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: kPrimary),
+            onPressed: () => _reativar(u.id!, u.nome),
+            icon: const Icon(Icons.restore, size: 18),
+            label: const Text('Reativar', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ),
         Positioned(
           top: 8,
           right: 8,

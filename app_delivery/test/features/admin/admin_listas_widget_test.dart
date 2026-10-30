@@ -142,6 +142,81 @@ void main() {
           tester.getTopLeft(find.text('Ana Ativa')).dy, greaterThan(tester.getTopLeft(find.text('Inativos').last).dy));
     });
 
+    testWidgets('botão Reativar aparece só para usuários inativos', (tester) async {
+      final api = _api(usuarios: [
+        _usuario(1, 'Ana Ativa', 'ana@juan.com'),
+        _usuario(2, 'Bruno Inativo', 'bruno@juan.com', ativo: false),
+        _usuario(3, 'Dora Inativa', 'dora@juan.com', ativo: false),
+      ]);
+      await api.executar(() => abrir(tester));
+      final reativar = find.widgetWithText(TextButton, 'Reativar');
+      expect(reativar, findsNWidgets(2));
+      expect(find.byIcon(Icons.restore), findsNWidgets(2));
+      // Cada botão fica na mesma faixa vertical do card do seu inativo, e nenhum no ativo.
+      final yBotoes = tester.widgetList(reativar).map((w) => tester.getCenter(find.byWidget(w)).dy).toList();
+      for (final nome in ['Bruno Inativo', 'Dora Inativa']) {
+        final card = tester.getRect(_cardDe(nome));
+        expect(yBotoes.where((y) => y > card.top && y < card.bottom), hasLength(1), reason: nome);
+      }
+      final cardAna = tester.getRect(_cardDe('Ana Ativa'));
+      expect(yBotoes.where((y) => y > cardAna.top && y < cardAna.bottom), isEmpty);
+    });
+
+    testWidgets('reativar pede confirmação, chama o PATCH, atualiza a lista e mostra SnackBar verde', (tester) async {
+      var brunoAtivo = false;
+      final api = ApiFalsa((r) {
+        if (r.method == 'PATCH' && r.url.path == '/usuarios/2/reativar') {
+          brunoAtivo = true;
+          return respostaJson(_usuario(2, 'Bruno Inativo', 'bruno@juan.com'));
+        }
+        return respostaJson([
+          _usuario(1, 'Ana Ativa', 'ana@juan.com'),
+          _usuario(2, 'Bruno Inativo', 'bruno@juan.com', ativo: brunoAtivo),
+        ]);
+      });
+      await api.executar(() async {
+        await abrir(tester);
+        await tester.tap(find.widgetWithText(TextButton, 'Reativar'));
+        await tester.pumpAndSettle();
+        expect(find.text('Deseja reativar este usuário?'), findsOneWidget);
+
+        await tester.tap(find.text('Cancelar'));
+        await tester.pumpAndSettle();
+        expect(api.doMetodo('PATCH'), isEmpty);
+
+        await tester.tap(find.widgetWithText(TextButton, 'Reativar'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Reativar')));
+        await tester.pumpAndSettle();
+      });
+      expect(api.doMetodo('PATCH').single.url.path, '/usuarios/2/reativar');
+      expect(api.doMetodo('GET').length, 2); // carregou a lista de novo
+      expect(find.text('Usuário "Bruno Inativo" reativado com sucesso'), findsOneWidget);
+      expect(find.text('Inativo'), findsNothing); // badge sumiu
+      expect(find.widgetWithText(TextButton, 'Reativar'), findsNothing);
+      expect(
+          find.descendant(of: _cardDe('Bruno Inativo'), matching: find.byIcon(Icons.delete_outline)), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4)); // deixa o SnackBar sair
+    });
+
+    testWidgets('erro ao reativar mostra a mensagem da API em SnackBar vermelho', (tester) async {
+      final api = ApiFalsa((r) {
+        if (r.method == 'PATCH') return respostaJson({'erro': 'Usuário já está ativo'}, 400);
+        return respostaJson([_usuario(2, 'Bruno Inativo', 'bruno@juan.com', ativo: false)]);
+      });
+      await api.executar(() async {
+        await abrir(tester);
+        await tester.tap(find.widgetWithText(TextButton, 'Reativar'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Reativar')));
+        await tester.pumpAndSettle();
+      });
+      expect(find.text('Usuário já está ativo'), findsOneWidget);
+      final snack = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snack.backgroundColor, Colors.red.shade700);
+      await tester.pump(const Duration(seconds: 6));
+    });
+
     testWidgets('painel de filtros: perfil Admin + badge de filtros ativos', (tester) async {
       final api = _api(usuarios: [
         _usuario(1, 'Ana Cliente', 'ana@juan.com'),
