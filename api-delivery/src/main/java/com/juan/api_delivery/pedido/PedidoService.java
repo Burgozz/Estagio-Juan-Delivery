@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.CANCELE_ANTES_DE_EXCLUIR;
 import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_CANCELADO_NAO_ALTERA;
 import static com.juan.api_delivery.shared.exception.MensagensErro.PEDIDO_NAO_ENCONTRADO;
 import static com.juan.api_delivery.shared.exception.MensagensErro.USUARIO_NAO_ENCONTRADO;
@@ -75,8 +76,19 @@ public class PedidoService {
         return repository.save(pedido);
     }
 
+    /**
+     * Exclui o pedido e seus itens. Um pedido com itens que não foi cancelado
+     * ainda está com o estoque baixado, então precisa ser cancelado antes
+     * (o cancelamento devolve o estoque). Aqui o estoque não é mexido.
+     */
+    @Transactional
     public void deletar(Long id) {
         Pedido pedido = buscarPorId(id);
+        List<ItemPedido> itens = itemPedidoRepository.findByPedidoId(id);
+        if (!itens.isEmpty() && pedido.getStatus() != StatusPedido.CANCELADO) {
+            throw new IllegalArgumentException(CANCELE_ANTES_DE_EXCLUIR);
+        }
+        itemPedidoRepository.deleteAll(itens);
         repository.delete(pedido);
     }
 }

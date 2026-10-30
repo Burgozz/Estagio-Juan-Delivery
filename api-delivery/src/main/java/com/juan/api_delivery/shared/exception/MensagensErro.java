@@ -14,6 +14,7 @@ public final class MensagensErro {
     public static final String EMAIL_OBRIGATORIO = "Email é obrigatório";
     public static final String PRODUTO_INDISPONIVEL = "Produto indisponível";
     public static final String PEDIDO_CANCELADO_NAO_ALTERA = "Pedido cancelado não pode ser alterado";
+    public static final String CANCELE_ANTES_DE_EXCLUIR = "Cancele o pedido antes de excluí-lo";
 
     public static final String NOME_TAMANHO = "Nome deve ter entre 2 e 100 caracteres";
     public static final String SENHA_TAMANHO = "Senha deve ter no mínimo 6 caracteres";

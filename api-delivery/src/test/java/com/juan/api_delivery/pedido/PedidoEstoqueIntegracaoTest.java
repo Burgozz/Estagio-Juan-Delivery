@@ -185,6 +185,39 @@ class PedidoEstoqueIntegracaoTest extends IntegracaoBase {
         }
 
         @Test
+        void excluirPedidoComItensNaoCanceladoERecusado() throws Exception {
+            long vinho = criarVinho(5);
+            long pedido = criarPedido();
+            comprar(pedido, vinho, 2);
+            mockMvc.perform(delete("/pedidos/" + pedido)).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Cancele o pedido antes de excluí-lo"));
+            assertThat(pedidoRepository.findById(pedido)).isPresent();
+            assertThat(itemPedidoRepository.findByPedidoId(pedido)).hasSize(1);
+            assertThat(produto(vinho).getEstoque()).isEqualTo(3);
+        }
+
+        @Test
+        void excluirPedidoCanceladoApagaItensSemDevolverEstoqueDeNovo() throws Exception {
+            long vinho = criarVinho(5);
+            long pedido = criarPedido();
+            comprar(pedido, vinho, 2);
+            mudarStatus(pedido, "CANCELADO").andExpect(status().isOk());
+            assertThat(produto(vinho).getEstoque()).isEqualTo(5);
+
+            mockMvc.perform(delete("/pedidos/" + pedido)).andExpect(status().isNoContent());
+            assertThat(pedidoRepository.findById(pedido)).isEmpty();
+            assertThat(itemPedidoRepository.findByPedidoId(pedido)).isEmpty();
+            assertThat(produto(vinho).getEstoque()).isEqualTo(5);
+        }
+
+        @Test
+        void excluirPedidoSemItensFunciona() throws Exception {
+            long pedido = criarPedido();
+            mockMvc.perform(delete("/pedidos/" + pedido)).andExpect(status().isNoContent());
+            assertThat(pedidoRepository.findById(pedido)).isEmpty();
+        }
+
+        @Test
         void pedidoCanceladoNaoMudaDeStatusNemDeItens() throws Exception {
             long vinho = criarVinho(5);
             long pedido = criarPedido();

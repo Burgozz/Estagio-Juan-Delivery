@@ -72,7 +72,12 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 ## Arquitetura Backend
 - Padrão 3 camadas: Controller → Service → Repository
 - Herança SINGLE_TABLE na tabela `produtos` com discriminador `tipo_produto`
-- Soft delete: nunca usar DELETE físico em `Usuario` e `Produto`, setar `ativo = false`
+- Exclusão:
+  - `Usuario`: soft delete, nunca DELETE físico (`DELETE /usuarios/{id}` seta `ativo = false`)
+  - `Produto`: DELETE físico só se o produto não aparece em nenhum pedido; com pedidos, a exclusão é
+    recusada e o admin zera o estoque (o que deixa o produto inativo)
+  - `Pedido`: com itens, só pode ser excluído depois de CANCELADO ("Cancele o pedido antes de excluí-lo");
+    a exclusão apaga os itens e não mexe no estoque
 - Produtos com estoque zero são desativados automaticamente (`ativo = false`). A regra fica em
   `Produto.atualizarAtivoConformeEstoque()` (usada também por `baixarEstoque`/`devolverEstoque`); não duplicar
 - Baixa/devolução de estoque busca o produto com `ProdutoRepository.findByIdParaAtualizarEstoque` (lock pessimista)
