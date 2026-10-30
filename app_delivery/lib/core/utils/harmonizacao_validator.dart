@@ -14,10 +14,17 @@ final harmonizacaoInputFormatter = FilteringTextInputFormatter.allow(_caracterPe
 /// Aplica trim e troca espaços repetidos por um só.
 String normalizarHarmonizacao(String? valor) => (valor ?? '').trim().replaceAll(RegExp(r'\s+'), ' ');
 
-/// Validação da harmonização (obrigatória para vinhos). Retorna null se válida.
+/// Harmonização normalizada, ou null se ficou vazia (campo opcional: a API salva null).
+String? harmonizacaoParaEnvio(String? valor) {
+  final texto = normalizarHarmonizacao(valor);
+  return texto.isEmpty ? null : texto;
+}
+
+/// Validação da harmonização (opcional). Vazia é aceita; preenchida, precisa
+/// seguir as regras de conteúdo. Retorna null se válida.
 String? validarHarmonizacao(String? valor) {
   final texto = normalizarHarmonizacao(valor);
-  if (texto.isEmpty) return 'Informe a harmonização';
+  if (texto.isEmpty) return null;
   if (texto.length < 3 || texto.length > 150) {
     return 'Harmonização deve ter entre 3 e 150 caracteres';
   }

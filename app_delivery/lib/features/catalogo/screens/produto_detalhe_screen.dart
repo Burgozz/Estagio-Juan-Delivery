@@ -193,10 +193,9 @@ class _ProdutoDetalheScreenState extends State<ProdutoDetalheScreen> {
           icone: Icons.opacity_outlined,
           label: 'Teor alcoólico',
           valor: p.teorAlcool != null ? '${p.teorAlcool}%' : '-'),
-      _InfoLinha(
-          icone: Icons.restaurant_outlined,
-          label: 'Harmonização',
-          valor: (p.harmonizacao != null && p.harmonizacao!.isNotEmpty) ? p.harmonizacao! : '-'),
+      // Harmonização é opcional: sem ela, a linha não aparece.
+      if (p.harmonizacao != null && p.harmonizacao!.trim().isNotEmpty)
+        _InfoLinha(icone: Icons.restaurant_outlined, label: 'Harmonização', valor: p.harmonizacao!),
     ];
   }
 

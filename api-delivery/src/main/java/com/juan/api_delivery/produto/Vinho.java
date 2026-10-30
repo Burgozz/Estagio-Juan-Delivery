@@ -40,6 +40,5 @@ public class Vinho extends Produto {
     @DecimalMax(value = "20.0", message = TEOR_ALCOOL_INVALIDO)
     private double teorAlcool;
 
-    @NotBlank
     private String harmonizacao;
 }
