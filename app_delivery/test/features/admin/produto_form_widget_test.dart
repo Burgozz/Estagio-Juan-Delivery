@@ -88,6 +88,27 @@ void main() {
       expect(find.byType(ProdutoFormScreen), findsNothing);
     });
 
+    testWidgets('digitar "alba" e apertar Enter no país preenche Albânia, foca a Safra e envia', (tester) async {
+      final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
+      await api.executar(() async {
+        await _abrir(tester);
+        await _preencherVinho(tester, escolherPais: false);
+        final campoPais = campo('País de Origem da Uva *');
+        await tester.tap(campoPais);
+        await tester.pump();
+        await tester.enterText(campoPais, 'alba');
+        await tester.pumpAndSettle();
+        await tester.testTextInput.receiveAction(TextInputAction.next);
+        await tester.pumpAndSettle();
+        final safra =
+            tester.widget<EditableText>(find.descendant(of: campo('Safra'), matching: find.byType(EditableText)));
+        expect(safra.focusNode.hasFocus, isTrue);
+        await _salvar(tester);
+        await tester.pump(const Duration(seconds: 1));
+      });
+      expect(api.corpoJson(api.doMetodo('POST').single)['paisOrigem'], 'Albânia');
+    });
+
     testWidgets('harmonização é normalizada (trim e espaços) antes de enviar', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
       await api.executar(() async {
