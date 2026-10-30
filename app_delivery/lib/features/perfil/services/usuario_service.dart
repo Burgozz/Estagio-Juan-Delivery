@@ -57,6 +57,14 @@ class UsuarioService {
     }
   }
 
+  /// Reativa um usuário inativo (PATCH /usuarios/{id}/reativar).
+  Future<void> reativar(int id) async {
+    final response = await http.patch(Uri.parse('$baseUrl/$id/reativar'));
+    if (response.statusCode != 200) {
+      throw Exception(parseErro(response));
+    }
+  }
+
   Future<void> deletar(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
     if (response.statusCode != 200 && response.statusCode != 204) {
