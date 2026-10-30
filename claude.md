@@ -73,7 +73,9 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 - Padrão 3 camadas: Controller → Service → Repository
 - Herança SINGLE_TABLE na tabela `produtos` com discriminador `tipo_produto`
 - Soft delete: nunca usar DELETE físico em `Usuario` e `Produto`, setar `ativo = false`
-- Produtos com estoque zero são desativados automaticamente (`ativo = false`)
+- Produtos com estoque zero são desativados automaticamente (`ativo = false`). A regra fica em
+  `Produto.atualizarAtivoConformeEstoque()` (usada também por `baixarEstoque`/`devolverEstoque`); não duplicar
+- Baixa/devolução de estoque busca o produto com `ProdutoRepository.findByIdParaAtualizarEstoque` (lock pessimista)
 - `DataInitializer` cria admin padrão ao subir o backend
 - Pacotes por funcionalidade (`usuario/`, `produto/`...): controller, service, repository, entidade e DTOs juntos
 - Injeção de dependência por construtor: campos `private final` + `@RequiredArgsConstructor`
@@ -95,7 +97,10 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
   - ADMIN: Usuários, Produtos
 - Erros de API exibidos inline embaixo do campo via `String? _xApiError`
 - Sempre usar `Form` + `GlobalKey<FormState>` + `validator` nos formulários
-- Carrinho: `CarrinhoController` com `ChangeNotifier` via `provider`
+- Carrinho: `CarrinhoController` com `ChangeNotifier` via `provider`. A quantidade de um item nunca passa do
+  estoque do produto (`adicionar`/`incrementar` retornam false no limite)
+- Finalizar pedido: se a API recusar um item, o app cancela o pedido criado (PATCH status=CANCELADO), mostra a
+  mensagem da API e mantém o carrinho
 - Cores: sempre pelas constantes de `lib/core/theme/app_colors.dart` (`kPrimary`, `kBackground`, `kCreme`...);
   nunca redeclarar `kPrimary` numa tela. Paletas exclusivas de uma tela (status, categorias) ficam na tela
 - `dart format` com largura de 120 colunas (configurado em `analysis_options.yaml`)
@@ -137,6 +142,13 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 - Produto com estoque 0 → `ativo = false` automaticamente
 - Produto com estoque > 0 e inativo → reativar automaticamente
 - Estoque > 0 obrigatório na criação, permitido 0 na edição
+- Pedido (`ItemPedidoService`, `PedidoService`, todos `@Transactional`):
+  - adicionar item baixa o estoque; recusa com 400 `{"erro"}` produto inativo ("Produto indisponível") e quantidade
+    maior que o estoque ("Estoque insuficiente para <nome>. Disponível: <n>")
+  - remover item (`DELETE /pedidos/{pedidoId}/itens/{id}`) devolve o estoque; o item precisa ser do `pedidoId` da URL
+  - `valorTotal` = soma de quantidade × precoUnit dos itens, recalculado a cada item adicionado ou removido
+  - mudar para CANCELADO devolve o estoque de todos os itens uma única vez; pedido cancelado não muda de status
+    nem de itens ("Pedido cancelado não pode ser alterado")
 - CPF: exatamente 11 dígitos numéricos
 - Telefone: 10 ou 11 dígitos numéricos
 - CEP: exatamente 8 dígitos numéricos

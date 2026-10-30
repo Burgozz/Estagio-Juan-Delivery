@@ -20,13 +20,18 @@ class _CarrinhoScreenState extends State<CarrinhoScreen> {
   final _service = PedidoService();
   bool _finalizando = false;
 
+  /// Cria o pedido e grava os itens um a um. Se a API recusar algum item
+  /// (estoque insuficiente ou produto indisponível), o pedido é cancelado,
+  /// o que devolve ao estoque os itens já gravados, e o carrinho é mantido
+  /// para o cliente ajustar.
   Future<void> _finalizarPedido(CarrinhoController carrinho) async {
     if (_finalizando || carrinho.itens.isEmpty) return;
     setState(() => _finalizando = true);
+    int? pedidoId;
     try {
       final itens = carrinho.itens;
       final total = carrinho.total;
-      final pedidoId = await _service.criar(
+      pedidoId = await _service.criar(
         usuarioId: SessaoUsuario.id!,
         valorTotal: total,
       );
@@ -38,25 +43,35 @@ class _CarrinhoScreenState extends State<CarrinhoScreen> {
           precoUnit: item.precoUnit,
         );
       }
+      final idCriado = pedidoId;
       carrinho.limpar();
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => ConfirmacaoPedidoScreen(pedidoId: pedidoId)),
+        MaterialPageRoute(builder: (_) => ConfirmacaoPedidoScreen(pedidoId: idCriado)),
       );
     } catch (e) {
+      if (pedidoId != null) await _cancelarSemFalhar(pedidoId);
       if (!mounted) return;
       final mensagem = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(mensagem),
           backgroundColor: Colors.red.shade700,
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
         ),
       );
     } finally {
       if (mounted) setState(() => _finalizando = false);
     }
+  }
+
+  /// Cancela o pedido incompleto. Se o cancelamento também falhar, o cliente
+  /// ainda vê a mensagem do item recusado, que é o que importa para ele.
+  Future<void> _cancelarSemFalhar(int pedidoId) async {
+    try {
+      await _service.atualizarStatus(pedidoId, 'CANCELADO');
+    } catch (_) {}
   }
 
   @override
@@ -141,6 +156,7 @@ class _CarrinhoScreenState extends State<CarrinhoScreen> {
                       children: [
                         _BotaoQuantidade(
                           icone: Icons.remove,
+                          tooltip: 'Diminuir quantidade',
                           onTap: () => carrinho.decrementar(i),
                         ),
                         SizedBox(
@@ -153,10 +169,18 @@ class _CarrinhoScreenState extends State<CarrinhoScreen> {
                         ),
                         _BotaoQuantidade(
                           icone: Icons.add,
-                          onTap: () => carrinho.incrementar(i),
+                          tooltip: item.noLimiteDoEstoque ? 'Estoque máximo atingido' : 'Aumentar quantidade',
+                          onTap: item.noLimiteDoEstoque ? null : () => carrinho.incrementar(i),
                         ),
                       ],
                     ),
+                    if (item.noLimiteDoEstoque) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Máximo disponível: ${item.produto.estoque}',
+                        style: const TextStyle(color: kTextSecondary, fontSize: 12),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -235,24 +259,31 @@ class _CarrinhoScreenState extends State<CarrinhoScreen> {
 
 class _BotaoQuantidade extends StatelessWidget {
   final IconData icone;
-  final VoidCallback onTap;
+  final String tooltip;
 
-  const _BotaoQuantidade({required this.icone, required this.onTap});
+  /// null deixa o botão desabilitado (cinza).
+  final VoidCallback? onTap;
+
+  const _BotaoQuantidade({required this.icone, required this.tooltip, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 28,
-        height: 28,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: kPrimary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8),
+    final habilitado = onTap != null;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: habilitado ? kPrimary.withValues(alpha: 0.08) : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icone, size: 16, color: habilitado ? kPrimary : Colors.grey.shade400),
         ),
-        child: Icon(icone, size: 16, color: kPrimary),
       ),
     );
   }
