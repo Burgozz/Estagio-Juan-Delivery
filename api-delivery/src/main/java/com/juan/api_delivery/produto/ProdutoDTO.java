@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 
 import static com.juan.api_delivery.shared.exception.MensagensErro.ESTOQUE_NEGATIVO;
 import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
-import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_NEGATIVO;
 
 @Data
 @NoArgsConstructor
@@ -37,8 +36,8 @@ public class ProdutoDTO {
     private String paisOrigem;
     @SafraValida
     private Integer safra;
-    @DecimalMin(value = "0.0", message = TEOR_ALCOOL_NEGATIVO)
-    @DecimalMax(value = "100.0", message = TEOR_ALCOOL_INVALIDO)
+    @DecimalMin(value = "7.0", message = TEOR_ALCOOL_INVALIDO)
+    @DecimalMax(value = "20.0", message = TEOR_ALCOOL_INVALIDO)
     private Double teorAlcool;
     // @Pattern e @Size ignoram null: Acessorio continua sem enviar harmonização.
     // O lookahead exige no mínimo 3 letras (igual ao app), para recusar texto só

@@ -17,8 +17,8 @@ public final class MensagensErro {
     public static final String SENHA_TAMANHO = "Senha deve ter no mínimo 6 caracteres";
     public static final String ESTOQUE_NEGATIVO = "Estoque não pode ser negativo";
     public static final String SAFRA_INVALIDA = "Safra deve estar entre 1800 e o ano atual";
-    public static final String TEOR_ALCOOL_NEGATIVO = "Teor alcoólico não pode ser negativo";
-    public static final String TEOR_ALCOOL_INVALIDO = "Teor alcoólico inválido";
+    // Faixa de teor alcoólico do vinho pela Lei nº 7.678/1988.
+    public static final String TEOR_ALCOOL_INVALIDO = "Teor alcoólico deve estar entre 7% e 20%";
 
     private MensagensErro() {
     }

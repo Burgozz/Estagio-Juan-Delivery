@@ -6,6 +6,8 @@ import com.juan.api_delivery.pedido.Pedido;
 import com.juan.api_delivery.pedido.StatusPedido;
 import com.juan.api_delivery.shared.IntegracaoBase;
 import com.juan.api_delivery.shared.validation.SafraValida;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.Map;
 
+import static com.juan.api_delivery.shared.exception.MensagensErro.TEOR_ALCOOL_INVALIDO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -165,22 +168,44 @@ class ProdutoIntegracaoTest extends IntegracaoBase {
             assertThat(safraDto.isAnnotationPresent(SafraValida.class)).as("@SafraValida em ProdutoDTO.safra").isTrue();
         }
 
+        // Faixa da Lei nº 7.678/1988: de 7% a 20%, com os dois extremos aceitos.
         @ParameterizedTest
-        @ValueSource(doubles = {0.0, 13.5, 100.0})
+        @ValueSource(doubles = {7.0, 13.5, 20.0})
         void teorAlcoolDentroDoLimitePassa(double teor) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("teorAlcool", teor);
-            criar(corpo);
+            long id = criar(corpo);
+            assertThat(((Vinho) doBanco(id)).getTeorAlcool()).isEqualTo(teor);
         }
 
         @ParameterizedTest
-        @ValueSource(doubles = {-0.1, 100.1})
+        @ValueSource(doubles = {0.0, 6.9, 20.1, 100.0})
         void teorAlcoolForaDoLimiteRetorna400NoFormatoErros(double teor) throws Exception {
             Map<String, Object> corpo = vinho();
             corpo.put("teorAlcool", teor);
             postJson("/produtos", corpo).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.erros").isArray());
+                .andExpect(jsonPath("$.erros", hasItem(TEOR_ALCOOL_INVALIDO)));
             assertThat(produtoRepository.count()).isZero();
+        }
+
+        @ParameterizedTest
+        @ValueSource(doubles = {6.9, 20.1})
+        void edicaoComTeorForaDoLimiteRetorna400(double teor) throws Exception {
+            long id = criar(vinho());
+            Map<String, Object> corpo = vinho();
+            corpo.put("teorAlcool", teor);
+            putJson("/produtos/" + id, corpo).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros", hasItem(TEOR_ALCOOL_INVALIDO)));
+            assertThat(((Vinho) doBanco(id)).getTeorAlcool()).isEqualTo(13.5);
+        }
+
+        @Test
+        void limitesDeTeorSaoIguaisNaEntidadeENoDto() throws Exception {
+            for (var campo : new java.lang.reflect.Field[] {
+                Vinho.class.getDeclaredField("teorAlcool"), ProdutoDTO.class.getDeclaredField("teorAlcool")}) {
+                assertThat(campo.getAnnotation(DecimalMin.class).value()).as("@DecimalMin em " + campo).isEqualTo("7.0");
+                assertThat(campo.getAnnotation(DecimalMax.class).value()).as("@DecimalMax em " + campo).isEqualTo("20.0");
+            }
         }
     }
 
