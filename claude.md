@@ -141,7 +141,7 @@ Models e services ficam na feature "dona" (ex.: `produto` em `catalogo/`) e as o
 - Telefone: 10 ou 11 dígitos numéricos
 - CEP: exatamente 8 dígitos numéricos
 - Safra: entre 1800 e o ano atual (`@SafraValida`, calculado com `Year.now()`)
-- Teor alcoólico: entre 0.0 e 100.0
+- Teor alcoólico: entre 7.0 e 20.0 (Lei nº 7.678/1988)
 - Email único por usuário
 - Todos os novos usuários criados via cadastro recebem perfil CLIENTE
 - Admin padrão: email `admin@juan.com`, senha `admin`
