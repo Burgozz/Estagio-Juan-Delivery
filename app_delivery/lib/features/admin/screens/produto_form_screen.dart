@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../catalogo/models/produto.dart';
 import '../../catalogo/services/produto_service.dart';
 import '../../../core/utils/harmonizacao_validator.dart';
+import '../../../core/utils/teor_alcool_validator.dart';
 import '../widgets/pais_autocomplete_field.dart';
 import '../../../core/widgets/label_obrigatorio.dart';
 import '../../../core/theme/app_colors.dart';
@@ -374,8 +375,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
               },
               validator: (v) {
                 if (v == null || v.isEmpty) return _teorAlcoolApiError;
-                if (double.tryParse(v.trim()) == null) return 'Valor inválido';
-                return _teorAlcoolApiError;
+                return validarTeorAlcool(v) ?? _teorAlcoolApiError;
               },
             ),
           ),
