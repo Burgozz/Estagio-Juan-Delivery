@@ -162,7 +162,7 @@ void main() {
     }
 
     // Lei nº 7.678/1988 (igual ao backend): teor de 7% a 20%.
-    for (final teor in ['6.9', '20.1']) {
+    for (final teor in ['6.9', '20.1', '6,9', '20,1']) {
       testWidgets('teor $teor é barrado no app com o erro embaixo do campo', (tester) async {
         final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
         await api.executar(() async {
@@ -188,6 +188,17 @@ void main() {
         expect(api.corpoJson(api.doMetodo('POST').single)['teorAlcool'], double.parse(teor));
       });
     }
+
+    testWidgets('teor com vírgula (12,5) é aceito e enviado com ponto (12.5)', (tester) async {
+      final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));
+      await api.executar(() async {
+        await _abrir(tester);
+        await _preencherVinho(tester, teor: '12,5');
+        await _salvar(tester);
+        await tester.pump(const Duration(seconds: 1));
+      });
+      expect(api.corpoJson(api.doMetodo('POST').single)['teorAlcool'], 12.5);
+    });
 
     testWidgets('estoque 0 é bloqueado na criação', (tester) async {
       final api = ApiFalsa((_) => respostaJson({'id': 1}, 201));

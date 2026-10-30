@@ -103,7 +103,7 @@ class _ProdutoFormScreenState extends State<ProdutoFormScreen> {
       categoria: _isVinho ? _categoriaSelecionada : null,
       paisOrigem: _isVinho ? _paisCtrl.text.trim() : null,
       safra: _isVinho ? int.tryParse(_safraCtrl.text.trim()) : null,
-      teorAlcool: _isVinho ? double.tryParse(_teorAlcoolCtrl.text.trim()) : null,
+      teorAlcool: _isVinho ? parseTeorAlcool(_teorAlcoolCtrl.text) : null,
       harmonizacao: _isVinho ? normalizarHarmonizacao(_harmonizacaoCtrl.text) : null,
       tipoAcessorio: _isVinho ? null : _tipoAcessorioCtrl.text.trim(),
       marca: _isVinho ? null : _marcaCtrl.text.trim(),
